@@ -1,7 +1,7 @@
 #+STARTUP: inlineimages overview
 
 * Everything goes here  
-** <<<Org>>> mode
+** Org mode
 :PROPERTIES:
 :ID:       5c2ad23d-b530-4671-bd70-05380e417f81
 :END:
@@ -14,9 +14,13 @@ I find this initial setup quite comfortable to use.
 Add below to y......fig =init.el= file:
             ... ...  ..
 #+begin_src..macs   ..
-(defun orgmo.e-se up ()
+(defun orgmode-setup ()
   (progn
+    (require 'org-tempo)
     (org-indent-mode)
+    (key-binding (kbd "C-c h o") 'outline-hide-other)
+    (define-key org-mode-map (kbd "C-c h o") 'outline-hide-other)
+    (setq org-id-link-to-org-use-id 'create-if-interactive)
     (auto-fill-mode)
     (set-fill-column 78)
     (message "Org-mode set up ;)"))
@@ -46,6 +50,9 @@ In order to faster insert code blocks in org mode, use either:
 Then, you can insert a code block by just typing =<s <TAB>=
 
 *** Formatting
+:PROPERTIES:
+:ID:       ec16ac95-93f6-46fd-938a-a4d93ce52856
+:END:
 - /italic/
 - *bold*
 - _underscore_
@@ -113,7 +120,7 @@ When adding a image, you can specify a property for inline display:
 [[./images/image-of-cat.jpg]]
 #+end_example
 
-** <<<Emacs>>>
+** Emacs
 :PROPERTIES:
 :ID:       b01035fa-063f-410e-9ea9-94167530cc02
 :END:
@@ -144,6 +151,15 @@ To disable making backup files at all, set below variable:
 *** Drawing ascii diagrams
 Easiest way to draw ascii diagrams in emacs is [[https://asciiflow.com][asciiflow]]
 
+*** Write code blocks in language mode
+You can write a source block in a separate window with it's appropriate mode
+turned on by pressing =C-c '= shortcut. When done, press =C-c '= again to
+finish editing.
+*** Return back after search
+After typing =C-s search string= in emacs and navigating through results, you might
+want to return back to original position.
+You can do this with =C-u C-SPACE=. What it does it pops marks from the mark
+ring, that is filled when you jump.
 * Programming
 ** General
 *** Workflow. In this order:
@@ -154,7 +170,7 @@ When working on a feature, i will usually follow below steps:
 3. Make it pretty
 4. Make it clean (refactor)
 
-** <<<Typescript>>>
+** Typescript
 
 For basic documentation on typescript see the [[https://www.typescriptlang.org/docs/handbook/2/basic-types.html][Documentation]]
 *** Resources
@@ -164,7 +180,7 @@ Resources on typescript:
 Classes documentation can be found [[https://www.typescriptlang.org/docs/handbook/2/classes.html][here]]
 *** Functions
 test                                                                                                    
-** <<Powershell>>                                                                                                                                                                                       
+** Powershell                                                                                                                                                                                       
 *** Create ssh key in windows and add it to github
 :PROPERTIES:
 :ID:       e1d81e89-b499-42a8-a2d2-368d0a23e8d5
@@ -231,9 +247,7 @@ Ternary logic in T-SQL represents predicates which may have 3 values:
 
 1. TRUE
 2. FALSE
-3. UNKNOWN
-
-*UNKNOWN value happens when one of the operands is NULL*
+3. UNKNOWN :: *UNKNOWN value is used when one of the operands is NULL*
 
 Rules of ternary logic:
 
@@ -249,3 +263,123 @@ Aggregate functions are the ones that take multiple values, and return a single 
 4. COUNT
 
 Source: https://docs.microsoft.com/en-us/sql/t-sql/functions/aggregate-functions-transact-sql?view=sql-server-ver16
+** Elisp (emacs-lisp)
+*** Hello world
+#+begin_src elisp
+  (print "Hello world")
+#+end_src
+
+#+RESULTS:
+: Hello world
+*** Working with buffers
+There are several function for working with buffers
+
+#+begin_src elisp :eval no
+  ;; returns the buffer name
+  (buffer-name)
+
+  ;; returns the file name associated with the buffer
+  (buffer-file-name)
+
+  ;; returns the current buffer object
+  (current-buffer)
+
+  ;; returns the buffer object used before current-buffer
+  (other-buffer)
+
+  ;; Get buffer by name
+  (get-buffer "*scratch*")
+
+  ;; Switching to another buffer
+  ;; Same as when pressing C-x b <buffer-name>
+  (switch-to-buffer (other-buffer))
+
+  ;; Set current buffer to...
+  (set-buffer (other-buffer))
+#+end_src
+
+#+RESULTS:
+: #<buffer init.el>
+**** Buffer size and cursor
+
+Determining the buffer size and the position of the cursor
+
+#+begin_src elisp
+  ;; Getting buffer size
+  (buffer-size (current-buffer))
+
+  ;; Getting the position of the cursor in the current buffer
+  (point)
+
+  ;; Getting the minimum position of the pointer (always 1?)
+  (point-min)
+
+  ;; Getting the max possible position of the pointer (always = buffer-size + 1?)
+  (point-max)
+#+end_src
+
+#+RESULTS:
+: 9074
+*** Defining functions in emacs lisp
+Function definition parts:
+#+begin_example
+(defun FUNCTION-NAME (ARGUMENTS...)
+  "OPTIONAL-DOCUMENTATION..."
+  (interactive ARGUMENT-PASSING-INFO)     ; optional
+  BODY...)
+#+end_example
+*** Interactive functions in emacs lisp
+An interactive function is a simple function with ~(interactive)~ specified in
+it's definition
+
+#+begin_src elisp
+  (defun multiply-by-seven (number)
+    "This function simply multiplies a number by 7"
+    (interactive "p")
+    (message "Result is %d" (* number 7)))
+#+end_src
+
+#+RESULTS:
+: multiply-by-seven
+**** Interactive arguments
+There are more characters that can be passed to ~interactive~ as arguments.
+See [[info:elisp#Interactive Codes][info:elisp#Interactive]]
+*** Predicates and boolean tests in elisp
+:PROPERTIES:
+:ID:       1d004eef-7276-403b-9ac8-d311d619f3e4
+:END:
+Any predicates in elisp return either ~nil~ or anything else.
+In fact, =false= value is just ~nil~. Anything else is interpreted as =true=.
+*** Elisp ~if~ keyword
+The if keyword can be used as follows in elisp:
+For details on how =test= part decides where to go, see [[id:1d004eef-7276-403b-9ac8-d311d619f3e4][Predicates and boolean tests in elisp]]
+
+#+begin_src elisp
+  (defun test-point ()
+    "Showcasing 'if' usage"
+    (let ((pos (point)))
+            (if (> pos 10)
+                (message "Point is at position %d" pos
+              (message "Point position too low (%d)" pos)))))
+  (test-point)
+#+end_src
+
+#+RESULTS:
+: Point is at position 10472
+*** Elisp ~save-excursion~ function
+This is a useful function that will evaluate some expressions from it's budy,
+then after everything is evaluated, it will restore the original point
+position so the user doesn't notice anything. It is useful in functions that
+need to manupulate the point, or switch buffers, but user doesn't expect the
+changed position as a side-effect.
+
+The template for this function looks like this
+
+#+begin_example
+(save-excursion
+  FIRST-EXPRESSION-IN-BODY
+  SECOND-EXPRESSION-IN-BODY
+  THIRD-EXPRESSION-IN-BODY
+   ...
+  LAST-EXPRESSION-IN-BODY)
+#+end_example
