@@ -1,4 +1,4 @@
-* Everything goes here
+* Everything goes here  
 ** <<<Org>>> mode
 :PROPERTIES:
 :ID:       5c2ad23d-b530-4671-bd70-05380e417f81
@@ -9,10 +9,10 @@ Useful resources:
 - [[http://doc.norang.ca/org-mode.html][Org Mode - Organize Your Life In Plain Text!]]
 *** Initial comfortable setup
 I find this initial setup quite comfortable to use.
-Add below to your cofig =init.el= file:
-
-#+begin_src emacs-lisp
-(defun orgmode-setup ()
+Add below to y......fig =init.el= file:
+            ... ...  ..
+#+begin_src..macs   ..
+(defun orgmo.e-se up ()
   (progn
     (org-indent-mode)
     (auto-fill-mode)
@@ -26,7 +26,7 @@ To enable indentation mode (looks a bit better), add this to your
 ~init.el~ file:
 
 #+begin_src emacs-lisp
-(defun orgmode-setup () 
+(defun orgmode-setup ()
 (progn (org-indent-mode)))
 (add-hook 'org-mode-hook 'orgmode-setup)
 #+end_src
@@ -38,7 +38,7 @@ In order to faster insert code blocks in org mode, use either:
 2. Enable =org-tempo= by adding below line to your =init.el= file:
 
 #+begin_src emacs-lisp
-(require 'org-tempo) 
+(require 'org-tempo)
 #+end_src
 
 Then, you can insert a code block by just typing =<s <TAB>=
@@ -100,7 +100,7 @@ For more info, see [[info:emacs#Backup][manual]] To stop emacs from making backu
 the same directory, you can add following to your =init.el= file:
 
 #+begin_src emacs-lisp
-;; Backup to another directory 
+;; Backup to another directory
 (setq backup-directory-alist '(("." . "~/.emacs.backups")))
  #+end_src
 
@@ -112,18 +112,106 @@ go in there.
 To disable making backup files at all, set below variable:
 
 #+begin_src emacs-lisp
-(setq make-backup-files -1) 
+(setq make-backup-files -1)
 #+end_src
+*** Drawing ascii diagrams
+Easiest way to draw ascii diagrams in emacs is [[https://asciiflow.com][asciiflow]]
 
 * Programming
+** General
+*** Workflow. In this order:
+When working on a feature, i will usually follow below steps:
+
+1. Make it work
+2. Make it fast
+3. Make it pretty
+4. Make it clean (refactor)
+
 ** <<<Typescript>>>
 
 For basic documentation on typescript see the [[https://www.typescriptlang.org/docs/handbook/2/basic-types.html][Documentation]]
 *** Resources
 Resources on typescript:
-- ...
+- Documentation: [[https://www.typescriptlang.org/docs/handbook/intro.html]]
 *** Classes
 Classes documentation can be found [[https://www.typescriptlang.org/docs/handbook/2/classes.html][here]]
 *** Functions
-test
-** <<Powershell>>
+test                                                                                                    
+** <<Powershell>>                                                                                                                                                                                       
+*** Create ssh key in windows and add it to github
+1. Create an Ssh key with Powershell ~ssh-keygen -c andrei.dimitrascu@gmail.com~
+2. run in ~Powershell Get-Content -Path $HOME\.ssh\id_rsa.pub | Set-Clipboard~
+   to save your public key to the clipboard
+3. Go to https://github.com/settings/ssh/new and add the content of your public key file
+4. Restart all terminal sessions, if =HOME= Environmental variable is set
+   correctly Git should start working with the new Ssh key (it will look for
+   =%HOME%/.ssh/id_rsa= file)
+*** Create link in powershell
+There are 2 types of files in windows, soft and hard.
+=Soft links=: just like regular links, there is an arrow symbol next to the icon.
+=Hard links=: Make it appear like the file is really on the location, although
+it's a link.
+
+#+begin_src powershell
+# Create soft link
+# Path can be either a file or a folder
+
+> New-Item -ItemType SymbolicLink -Path "PathWhereLinkShouldBeCreated" -Target "Target"
+
+# Create hard link for a file
+
+> New-Item -ItemType HardLink -Path "PathWhereLinkShouldBeCreated" -Target "Target"
+
+# Create hard link for a folder (junction point)
+ 
+> New-Item -ItemType Junction -Path "PathWhereLinkShouldBeCreated" -Target "Target"
+#+end_src
+*** Measure command execution time in powershell
+#+begin_src powershell
+Measure-Command { Invoke-Expression "cargo run" | Out-Default } 
+#+end_src
+*** Powershell add command line arguments
+#+begin_src powershell
+[CmdletBinding()]
+param (
+    [Parameter()]
+    [string]
+    $paths,
+    [Parameter()]
+    [string]
+    $destination
+)
+
+# Logic
+Write-Output "$paths and $destination"
+#+end_src
+*** Powershell check if file exists
+#+begin_src powershell
+if (-Not (Test-Path -Path $paths)) {
+   # Logic   
+}
+#+end_src
+** T-SQL
+*** 3VL or Ternary logic
+Ternary logic in T-SQL represents predicates which may have 3 values:
+
+1. TRUE
+2. FALSE
+3. UNKNOWN
+
+*UNKNOWN value happens when one of the operands is NULL*
+
+Rules of ternary logic:
+
+Any comparison of 2 =UNKNOWNs= is also =UNKNWON=
+Comparison of any =KNOWN= value to =UNKNOWN= value is also =UNKNOWN=
+A State predicate (a strict Yes or No question), always evaluates to =TRUE= or =FALSE=
+*** Aggregate functions
+Aggregate functions are the ones that take multiple values, and return a single value. Examples of aggregate functions:
+
+1. MAX
+2. MIN
+3. AVG
+4. COUNT
+
+Source: https://docs.microsoft.com/en-us/sql/t-sql/functions/aggregate-functions-transact-sql?view=sql-server-ver16
