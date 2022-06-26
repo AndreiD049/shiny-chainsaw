@@ -177,10 +177,6 @@ test
    correctly Git should start working with the new Ssh key (it will look for
    =%HOME%/.ssh/id_rsa= file)
 
-#+attr_org: :width 400
-#+attr_html: :width 300
-[[./data/images/th-3293152142.jpg]]
-
 *** Create link in powershell
 There are 2 types of files in windows, soft and hard.
 - =Soft links=: just like regular links, there is an arrow symbol next to the icon.
