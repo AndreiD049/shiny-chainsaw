@@ -1,0 +1,129 @@
+* Everything goes here
+** <<<Org>>> mode
+:PROPERTIES:
+:ID:       5c2ad23d-b530-4671-bd70-05380e417f81
+:END:
+Everything i usually use in org-mode
+*** Resources
+Useful resources:
+- [[http://doc.norang.ca/org-mode.html][Org Mode - Organize Your Life In Plain Text!]]
+*** Initial comfortable setup
+I find this initial setup quite comfortable to use.
+Add below to your cofig =init.el= file:
+
+#+begin_src emacs-lisp
+(defun orgmode-setup ()
+  (progn
+    (org-indent-mode)
+    (auto-fill-mode)
+    (set-fill-column 78)
+    (message "Org-mode set up ;)"))
+  )
+(add-hook 'org-mode-hook 'orgmode-setup)
+#+end_src
+*** Enable indentation mode
+To enable indentation mode (looks a bit better), add this to your
+~init.el~ file:
+
+#+begin_src emacs-lisp
+(defun orgmode-setup () 
+(progn (org-indent-mode)))
+(add-hook 'org-mode-hook 'orgmode-setup)
+#+end_src
+
+*** Fast insertion of code blocks (and any other templates)
+
+In order to faster insert code blocks in org mode, use either:
+1. =C-c C-,= and select a template to insert
+2. Enable =org-tempo= by adding below line to your =init.el= file:
+
+#+begin_src emacs-lisp
+(require 'org-tempo) 
+#+end_src
+
+Then, you can insert a code block by just typing =<s <TAB>=
+
+*** Formatting
+- /italic/
+- *bold*
+- _underscore_
+- =verbatim=
+- ~code~
+- +strikethrough+
+
+*** Tables
+Any line starting with =|= symbol is interpreted as a table.  For
+example wtite =|Name|Surname|Age + <TAB>= and you will start a table
+**** TODO Useful shortcuts
+*** Add file to org-agenda edited
+:PROPERTIES:
+:ID: 1ed495c7-4875-4d98-88c7-511718c4850e
+:END:
+
+Use function =org-agenda-file-to-front=, or shortcut =C-c [=.  This
+will add/move the file to the front of variable list
+=org-agenda-files= If you add a directory, it will add all the files
+from this directory.
+
+*** Searching in org-mode
+You can use your agenca (=C-c a=) as a search engine.
+
+A good resource on this search -
+[[https://orgmode.org/worg/org-tutorials/advanced-searching.html]]
+
+1. Make sure all your files/directories are added visible to agenda
+   (see [[id:1ed495c7-4875-4d98-88c7-511718c4850e][Add file to org-agenda]])
+2. Enter agenda search view with =C-c a s=
+3. Here you can search either simple strings - =ex: mystring=, or
+   search multiple keywords (=+type +class= will search for entries
+   containing both words =type= and =class=).
+
+*NOTE:* If search doesn't start with a character like =+, -, \*= it
+will be interpreted as a literal string search
+
+*NOTE:* If you use minus sign instead of plus, you will exclude a
+word, so =+type -class= will search for all entries containing =type=
+and not contianing =class= You can also search on regulas expressions,
+example =+{type\|class}= will search entries containing =type= or
+=class= keywords (notice the escaped /pipe/ character)
+** <<<Emacs>>>
+:PROPERTIES:
+:ID:       b01035fa-063f-410e-9ea9-94167530cc02
+:END:
+
+Notes on emacs itse
+*** Disable annoying backup files
+
+**** Specify another directory
+
+For more info, see [[info:emacs#Backup][manual]] To stop emacs from making backup files in
+the same directory, you can add following to your =init.el= file:
+
+#+begin_src emacs-lisp
+;; Backup to another directory 
+(setq backup-directory-alist '(("." . "~/.emacs.backups")))
+ #+end_src
+
+You can then create a directory as specified and all backup files will
+go in there.
+
+**** Disable backups
+
+To disable making backup files at all, set below variable:
+
+#+begin_src emacs-lisp
+(setq make-backup-files -1) 
+#+end_src
+
+* Programming
+** <<<Typescript>>>
+
+For basic documentation on typescript see the [[https://www.typescriptlang.org/docs/handbook/2/basic-types.html][Documentation]]
+*** Resources
+Resources on typescript:
+- ...
+*** Classes
+Classes documentation can be found [[https://www.typescriptlang.org/docs/handbook/2/classes.html][here]]
+*** Functions
+test
+** <<Powershell>>
