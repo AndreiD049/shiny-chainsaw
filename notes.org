@@ -1,4 +1,4 @@
-#+STARTUP: inlineimages
+#+STARTUP: inlineimages overview
 
 * Everything goes here  
 ** <<<Org>>> mode
