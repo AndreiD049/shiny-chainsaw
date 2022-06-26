@@ -1,3 +1,5 @@
+#+STARTUP: inlineimages
+
 * Everything goes here  
 ** <<<Org>>> mode
 :PROPERTIES:
@@ -86,6 +88,31 @@ word, so =+type -class= will search for all entries containing =type=
 and not contianing =class= You can also search on regulas expressions,
 example =+{type\|class}= will search entries containing =type= or
 =class= keywords (notice the escaped /pipe/ character)
+*** Add image to org file
+An image is just a link without protocol
+
+#+begin_example
+[[./images/image-of-cat.jpg]]
+#+end_example
+
+
+**** Display inline image
+To display the image inline, use =C-c C-x v= (/org-toggle-inline-images/)
+As an alternative, set the startup buffer variable at the top of the file (see
+[[info:org#In-buffer Settings][info:org#In-buffer Settings]])
+
+#+begin_example
+#+STARTUP: inlineimages
+#+end_example
+
+**** Set inline image size (width/height)
+When adding a image, you can specify a property for inline display:
+
+#+begin_example
+#+attr_org: :width 100
+[[./images/image-of-cat.jpg]]
+#+end_example
+
 ** <<<Emacs>>>
 :PROPERTIES:
 :ID:       b01035fa-063f-410e-9ea9-94167530cc02
@@ -151,7 +178,7 @@ test
    =%HOME%/.ssh/id_rsa= file)
 
 #+attr_org: :width 400
-#+attr_html: :width 400
+#+attr_html: :width 300
 [[./data/images/th-3293152142.jpg]]
 
 *** Create link in powershell
