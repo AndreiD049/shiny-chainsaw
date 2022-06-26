@@ -149,8 +149,8 @@ test
 *** Create link in powershell
 There are 2 types of files in windows, soft and hard.
 - =Soft links=: just like regular links, there is an arrow symbol next to the icon.
-- =Hard links=: Make it appear like the file is really on the location, although
-it's a link.
+- =Hard links=: Make it appear like the file is really on the location,
+  although it's a link.
 
 #+begin_src powershell
 # Create soft link
