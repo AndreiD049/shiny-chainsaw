@@ -139,6 +139,9 @@ Classes documentation can be found [[https://www.typescriptlang.org/docs/handboo
 test                                                                                                    
 ** <<Powershell>>                                                                                                                                                                                       
 *** Create ssh key in windows and add it to github
+:PROPERTIES:
+:ID:       e1d81e89-b499-42a8-a2d2-368d0a23e8d5
+:END:
 1. Create an Ssh key with Powershell ~ssh-keygen -c andrei.dimitrascu@gmail.com~
 2. run in ~Powershell Get-Content -Path $HOME\.ssh\id_rsa.pub | Set-Clipboard~
    to save your public key to the clipboard
@@ -146,6 +149,11 @@ test
 4. Restart all terminal sessions, if =HOME= Environmental variable is set
    correctly Git should start working with the new Ssh key (it will look for
    =%HOME%/.ssh/id_rsa= file)
+
+#+attr_org: :width 400
+#+attr_html: :width 400
+[[./data/images/th-3293152142.jpg]]
+
 *** Create link in powershell
 There are 2 types of files in windows, soft and hard.
 - =Soft links=: just like regular links, there is an arrow symbol next to the icon.
@@ -186,6 +194,9 @@ param (
 Write-Output "$paths and $destination"
 #+end_src
 *** Powershell check if file exists
+:PROPERTIES:
+:ID:       753964a2-937e-4166-b82a-e8c4e1ea60e7
+:END:
 #+begin_src powershell
 if (-Not (Test-Path -Path $paths)) {
    # Logic   
