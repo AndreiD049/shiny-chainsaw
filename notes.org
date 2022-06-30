@@ -44,7 +44,7 @@ In order to faster insert code blocks in org mode, use either:
 2. Enable =org-tempo= by adding below line to your =init.el= file:
 
 #+begin_src emacs-lisp
-(require 'org-tempo)
+  (require 'org-tempo)
 #+end_src
 
 Then, you can insert a code block by just typing =<s <TAB>=
@@ -141,7 +141,7 @@ the same directory, you can add following to your =init.el= file:
 You can then create a directory as specified and all backup files will
 go in there.
 
-**** Disable backups
+*** Disable backups
 
 To disable making backup files at all, set below variable:
 
@@ -160,6 +160,11 @@ After typing =C-s search string= in emacs and navigating through results, you mi
 want to return back to original position.
 You can do this with =C-u C-SPACE=. What it does it pops marks from the mark
 ring, that is filled when you jump.
+*** Edit code blocks in a separate buffer
+If you have a code/source block and you want to edit it in it's own language
+mode, you can press =C-c '= and a new buffer will be opened where you can edit
+the code. Then, after you're done, press =C-c '= again and code will be
+transferred to org mode source block
 * Programming
 ** General
 *** Workflow. In this order:
@@ -268,9 +273,6 @@ Source: https://docs.microsoft.com/en-us/sql/t-sql/functions/aggregate-functions
 #+begin_src elisp
   (print "Hello world")
 #+end_src
-
-#+RESULTS:
-: Hello world
 *** Working with buffers
 There are several function for working with buffers
 
