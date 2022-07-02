@@ -184,6 +184,8 @@ Notes about self haircut whatever:
 | Number 10                           |                       32 |
 | Number 12                           |                     37.5 |
 |-------------------------------------+--------------------------|
+**** Haircut videos:
+[[https://www.youtube.com/watch?v=wNlxye9kF2E][How to Cut the Sides of Your Own Hair | The Up and Down Method]]
 
 * Programming
 ** General
