@@ -167,7 +167,7 @@ the code. Then, after you're done, press =C-c '= again and code will be
 transferred to org mode source block
 ** Misc
 *** Haircut
-Notes about self haircut whatever:
+Notes about self haircut, whatever:
 **** Guard sizes
 |-------------------------------------+--------------------------|
 | Clipper Guard Number                | Size in Millimeters (mm) |
