@@ -168,8 +168,8 @@ ring, that is filled when you jump.
 *** Add more refile targets
 In order to add more headings and files when using [[help:org-refile][org-refile]] command (=C-c C-w=), you can
 customize the [[help:org-refile-targets][org-refile-targets]] variable.
-Examples:
 
+Examples:
 #+begin_src emacs-lisp
   (setq org-refile-targets
         '((nil . (:level . 1))  ;; Here nil means search only current buffer
@@ -178,7 +178,8 @@ Examples:
 
 #+RESULTS:
 : ((nil :level . 1) (org-agenda-files :maxlevel . 2))
-
+*** Disable bell from ringing in emacs
+Add this to your =init.el= file - ~(setq ring-bell-function 'ignore)~
 ** Misc
 *** Haircut
 Notes about self haircut, whatever:
