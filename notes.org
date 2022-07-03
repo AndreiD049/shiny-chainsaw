@@ -120,6 +120,11 @@ When adding a image, you can specify a property for inline display:
 [[./images/image-of-cat.jpg]]
 #+end_example
 
+*** Edit code blocks in a separate buffer
+If you have a code/source block and you want to edit it in it's own language
+mode, you can press =C-c '= and a new buffer will be opened where you can edit
+the code. Then, after you're done, press =C-c '= again and code will be
+transferred to org mode source block
 ** Emacs
 :PROPERTIES:
 :ID:       b01035fa-063f-410e-9ea9-94167530cc02
@@ -160,11 +165,20 @@ After typing =C-s search string= in emacs and navigating through results, you mi
 want to return back to original position.
 You can do this with =C-u C-SPACE=. What it does it pops marks from the mark
 ring, that is filled when you jump.
-*** Edit code blocks in a separate buffer
-If you have a code/source block and you want to edit it in it's own language
-mode, you can press =C-c '= and a new buffer will be opened where you can edit
-the code. Then, after you're done, press =C-c '= again and code will be
-transferred to org mode source block
+*** Add more refile targets
+In order to add more headings and files when using [[help:org-refile][org-refile]] command (=C-c C-w=), you can
+customize the [[help:org-refile-targets][org-refile-targets]] variable.
+Examples:
+
+#+begin_src emacs-lisp
+  (setq org-refile-targets
+        '((nil . (:level . 1))  ;; Here nil means search only current buffer
+          (org-agenda-files . (:maxlevel . 2)))) ;; Search in org-agenda files
+#+end_src
+
+#+RESULTS:
+: ((nil :level . 1) (org-agenda-files :maxlevel . 2))
+
 ** Misc
 *** Haircut
 Notes about self haircut, whatever:
