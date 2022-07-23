@@ -316,6 +316,10 @@ class Solution:
         return -1
 #+end_src
 ** Chrome extension development
+*** Getting started
+1. Open link in chrome `chrome://extensions`
+2. Click ~Developer mode~
+3. Click ~Load unpacked~ and select the project folder
 *** Creating a manifest
 :PROPERTIES:
 :ID:       971eea90-a5a4-45c6-b8c6-42b6d54a4150
@@ -365,7 +369,71 @@ Create a manifest in the root of the project
 -   Create a html file that will be shown on options (example `options.html`)
 -   Add `options_page` property to the [[id:971eea90-a5a4-45c6-b8c6-42b6d54a4150][manifest]]
 -   Additionally, add respective javascript files
-** Node js
+*** Enable typing
+To enable types, create a file jsconfig.json in the root directory, and add:
+
+#+begin_src js
+{
+    "typeAcquisition": {
+        "include": ["chrome"]
+    }
+}
+#+end_src
+
+For this, your directory will need to be initialized as npm package.
+*** Service worker
+A service worker in chrome extension is registered in the [[id:971eea90-a5a4-45c6-b8c6-42b6d54a4150][manifest]] using property ~background~ property.
+Service worker is not meant to modify the DOM, in fact it doesn't have a ~window~ in it's environment. It is meant to listen to events instead.
+
+**** What are Service workers
+Service workers are a special kind of [[https://developer.mozilla.org/en-US/docs/Web/API/Worker][web-workers]]. Service workers are Javascript scripts that run in the browser's background and are not linked to a particular web page. Often usage of a service worker involves a cache and enabling offline functionality, since service workers can intercept network request and interrupt/modify them. Service workers can't access the DOM, since they are not linked to a particular web page or tab, but they can communicate with the page by sending messages. If service workers need access to a persistent storage, they can use Indexdb
+
+**** Life cycle
+***** Why life cycle is important
+Life cycle is important especially in situations when you want to update the service worker with a new version.
+
+1.  Provide seamless offline experience
+2.  Make sure a new version of the service worker can download itself and install itself without interrupting the existing one
+3.  Make sure that each page which is in scope is controlled by the same service worker
+4.  Make sure no two different versions of service workers are running in the same session
+
+***** Download
+Download phase happens the first time when you call ~navigator.serviceWorker.register~. It will try to download all scripts and static files. If any of those fail, the service worker will not be installed and will retry it next time.
+
+***** Install
+After a successful download, service worker get's an `install` event. Install event will be called only once for each service worker, and this is the place to setup all caches and dependencies. If `install` fails, it will never be able to control the clients (see [[https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle#install]])
+
+***** Activate
+
+~activate~ is the state when service worker becomes functional. But it will not control the client the first time it activated after ~register~, because initially page loaded without the service worker being installed. To start controlling, page needs to be loaded with service worker already being installed (in other words, refresh the page). (You could start controlling the client without refreshing the page, see [[https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle#clientsclaim]]
+
+***** Life cycle during update
+When updating a service worker the life cycle is similar, but with small nuances
+
+***** Download the updated version
+The new version will be downloaded if at least a byte of a difference in the service worker or it's modules is spotted.
+
+***** Installing the update
+Then the service worker is installed (the old version is still running). After installation the updated service worker is put in a `waiting` state. This means that old service worker is still running, and will be running until there is at least one page controller by it opened. This should prevent 2 different service workers controlling the same page. (you can [skip](https://developers.google.com/web/fundamentals/primers/service-workers/lifecycle#skip_the_waiting_phase) the waiting phase)
+
+***** Activating the update
+One you close all your tabs and open it again, the new service worker will be ~activated~.
+
+==Important: event handlers must be registered synchronously==
+If you register event handlers in a async function you might miss the events, because browser will terminate the service worker when it's not needed and will spawn it again when it's required.
+
+***** Storage
+Because browser will terminate the Service worker when necessary, you cannot rely on in-memory storage like variables, as they might be reset. Instead, use [[https://developer.chrome.com/docs/extensions/reference/storage/]]
+
+***** Example
+Example of an event you might want is `chrome.runtime.onInstalled`, which fill fire once when your application is installed. It might be used to setup the environment and do more setup.
+*** Content scripts
+Content scripts contain code that is meant to be inserted to the page's DOM and modify content there.
+**** Static injection
+Static script and css injection is done via manifest file. Using `content_scripts` property (see [[id:971eea90-a5a4-45c6-b8c6-42b6d54a4150][Creating a manifest]])
+**** Dynamic injection
+Dynamic script injection can be done at runtime in response to events. It's done using ~chrome.scripting.executeScript~ (see [[https://developer.chrome.com/docs/extensions/reference/scripting/#method-executeScript][documentation]])
+** Node js and Javascript
 *** Add eslint to project
 -   Install eslint – ~npm i -D eslint~
 -   Run – ~npx eslint --init~
@@ -452,6 +520,48 @@ module.exports = {
         })
     ],
 }
+#+end_src
+*** Common js cycle
+Sometimes common js modules depend on one another. In this case, an object might receive a dependency that was not loaded completely. For example:
+
+~a.js~:
+#+begin_src js
+console.log('a starting');
+exports.done = false;
+const b = require('./b.js');
+console.log('in a, b.done = %j', b.done);
+exports.done = true;
+console.log('a done');
+#+end_src
+
+~b.js~:
+#+begin_src js
+console.log('b starting');
+exports.done = false;
+const a = require('./a.js');
+console.log('in b, a.done = %j', a.done);
+exports.done = true;
+console.log('b done');
+#+end_src
+
+~main.js~:
+#+begin_src js
+console.log('main starting');
+const a = require('./a.js');
+const b = require('./b.js');
+console.log('in main, a.done = %j, b.done = %j', a.done, b.done);
+#+end_src
+
+The output of above will be:
+#+begin_src text
+main starting
+a starting
+b starting
+in b, a.done=false
+b done
+in a, b.done=true
+a done
+in main, a.done = true, b.done = true
 #+end_src
 ** Typescript
 :PROPERTIES:
@@ -579,7 +689,26 @@ if (-Not (Test-Path -Path $paths)) {
 Alter the role afterwards - ~ALTER ROLE rast999 WITH CREATEDB CREATEROLE LOGIN REPLICATION;~
 ***** Set a new password
 Setting new password is the same ~ALTER ROLE sample WITH PASSWORD 'newpassword';~
+**** Check if Postgres service is running
+To check if the service is running on Linux:
+~sudo service postgresql status~
+
+To start the service if it's not running:
+~sudo service postgresql start~
+**** Combine queries with union operator
+Union will combines different queries. Columns in all queries must have the same type. ~UNION~ will remove all duplicates from resulting table. There is also ~UNION ALL~ that will leave the duplicates.
+
+#+begin_src sql
+SELECT surname
+  FROM cd.members
+    UNION  -- couls also use UNION ALL
+SELECT name
+  FROM cd.facilities;
+#+end_src
 *** T-SQL
+:PROPERTIES:
+:ID:       a05ed9e6-09fe-49fd-aa4f-8e1db8d1976c
+:END:
 **** Category of statements in T-SQL
 There are 3 base categories of statements in T-SQL:
 
@@ -587,6 +716,9 @@ There are 3 base categories of statements in T-SQL:
 - DDL (Data Definition Language) - statments used to define the database schema and create tables (CREATE, ALTER, DROP)
 - DCL (Data Control Language) - statements used to manage users and their permissions (GRANT, REVOKE, DENY)
 **** 3VL or Ternary logic
+:PROPERTIES:
+:ID:       83fba0f7-6614-4212-8954-ecfe58d0f699
+:END:
 Ternary logic in T-SQL represents predicates which may have 3 values:
 
 1. TRUE
@@ -626,6 +758,30 @@ Will return something like this:
 | Court1 | cheap     |
 | Court2 | expensive |
 |--------+-----------|
+**** Checking for NULL
+Checking for NULL in [[id:a05ed9e6-09fe-49fd-aa4f-8e1db8d1976c][T-SQL]] is done like below:
+
+#+begin_src sql
+-- Check if valus is null
+X IS NULL
+
+-- Check if value is not null
+X IS NOT NULL
+
+-- Example
+SELECT Customer AS Name
+    FROM Customers
+    WHERE Country IS NOT NULL;
+#+end_src
+
+It is not a comparison predicate, it's a state predicate. It can only evaluate to ~TRUE~ or ~FALSE~ (see [[id:83fba0f7-6614-4212-8954-ecfe58d0f699][3VL or Ternary logic]])
+**** Comments
+For comments in T-SQL, use:
+
+#+begin_src sql
+-- This is a single line comment
+/ this is a multiline comment /
+#+end_src
 ** Elisp (emacs-lisp)
 *** Hello world
 #+begin_src elisp
