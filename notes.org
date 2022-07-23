@@ -237,6 +237,10 @@ When working on a feature, i will usually follow below steps:
 *** Cheat Sheets
 Good online cheat sheets - [[https://devhints.io/]]
 Command line cheat sheet - [[https://cheat.sh/]]
+*** Definition of an Enterprise application
+From the book =Patterns of enterprise applications architecture=
+Some might say that enterprise applications are just big systems, but there are plenty of large projects that are not enterprise applications.
+My understanding of enterprise applications is that. Those are systems integrated very closely with business processes (or driving business processes). Like for example payroll, logistic applications and warehouse management systems, financial applications etc. Those applications often operate with data and this data needs to persist somewhere. Enterprise applications are often built around some business rules, and Layered architecture is very helpful with this. By isolating business rules to a separate layer, it will be easier to change (and business rules are something that changes a lot)
 ** Algorithms
 Here i will document my solutions to various leetcode questions. I will first attempt to solve them in Python or Javascript
 
@@ -327,6 +331,19 @@ There are 2 possible solutions that appear to me as optimal:
 
 1. Sort the array first. It is easy to find out if there are duplicates in a sorted array. The complexity will be then equal to the complexity of sorting. This is a more memory efficient method.
 2. Use a hash map to identify if an element was previously found
+** Design Patterns
+*** Decorator pattern
+[[https://refactoring.guru/design-patterns/decorator][Source - refactoring guru]]
+Decorator design pattern is used to enhance an object using `Composition` instead of inheritance, while preserving the same interface
+
+**** Example
+Let's say I have a ~DataSource~ class in my library. Users of the library have requested a new feature to be able to encrypt the content of the ~DataSource~, and other users requested compression of the ~DataSource~. Some of them would like to have both. In this case I can just implement two decorators (as seen in  [[id:d0264d8b-852b-40be-8c48-c708a4bc075b][Pseudo code]] section). Then, client can use either one of those, or he can combine them and have something like this ~(((FileDataSource) EncryptionDecorator) CompressionDecorator)~
+
+**** Pseudo code :ATTACH:
+:PROPERTIES:
+:ID:       d0264d8b-852b-40be-8c48-c708a4bc075b
+:END:
+[[attachment:pseudo.png]]
 ** Chrome extension development
 *** Getting started
 1. Open link in chrome `chrome://extensions`
@@ -445,26 +462,31 @@ Content scripts contain code that is meant to be inserted to the page's DOM and 
 Static script and css injection is done via manifest file. Using `content_scripts` property (see [[id:971eea90-a5a4-45c6-b8c6-42b6d54a4150][Creating a manifest]])
 **** Dynamic injection
 Dynamic script injection can be done at runtime in response to events. It's done using ~chrome.scripting.executeScript~ (see [[https://developer.chrome.com/docs/extensions/reference/scripting/#method-executeScript][documentation]])
+*** Creating UI for the extension
+Create a ~.html~ file with the ui
+Add a action property to the manifest. See [[id:971eea90-a5a4-45c6-b8c6-42b6d54a4150][manifest]]
 ** Powershell
 *** Create ssh key in windows and add it to github
 :PROPERTIES:
 :ID:       e1d81e89-b499-42a8-a2d2-368d0a23e8d5
 :END:
 1. Create an Ssh key with Powershell ~ssh-keygen -c andrei.dimitrascu@gmail.com~
-2. run in ~Powershell Get-Content -Path $HOME\.ssh\id_rsa.pub | Set-Clipboard~
-   to save your public key to the clipboard
+2. run in ~Powershell Get-Content -Path $HOME\.ssh\id_rsa.pub | Set-Clipboard~ to save your public key to the clipboard
 3. Go to https://github.com/settings/ssh/new and add the content of your public key file
 4. Restart all terminal sessions, if =HOME= Environmental variable is set
    correctly Git should start working with the new Ssh key (it will look for
    =%HOME%/.ssh/id_rsa= file)
 
 *** Create link in powershell
+:PROPERTIES:
+:ID:       3c5794b4-a7ea-4011-af27-895d646f16e3
+:END:
 There are 2 types of files in windows, soft and hard.
 - =Soft links=: just like regular links, there is an arrow symbol next to the icon.
 - =Hard links=: Make it appear like the file is really on the location,
   although it's a link.
 
-#+begin_src powershell
+#+begin_src sh
 # Create soft link
 # Path can be either a file or a folder
 
@@ -506,7 +528,19 @@ if (-Not (Test-Path -Path $paths)) {
    # Logic
 }
 #+end_src
+** Linux
+*** Create symlink
+Links are created using the ~ln~ command.
+
+#+begin_src sh
+ln -sf ~/dotfiles/nvim ~/.config/nvim
+#+end_src
+
+For windows, see [[id:3c5794b4-a7ea-4011-af27-895d646f16e3][Create link in powershell]]
 ** Databases
+*** ACID
+ACID stands for atomicity, consistency, isolation, durability.
+In short it's the ability of the database to handle complex operations as a single transaction, and guarantee data remains valid even after unforeseen issues like outages or other errors.
 *** Postgres SQL
 **** Alter user role in Postgres
 ***** Change role
@@ -567,6 +601,17 @@ Note: This will create a simple role without any privileges.
 To grant role privileges you can:
 Specify them at creation time - ~CREATE ROLE rast999 CREATEDB CREATEROLE LOGIN REPLICATION;~
 In order to check which users are currently created, see [[id:0ef0a298-1609-425d-9547-93ffb7e70649][List users in postgres]]
+**** Create table
+#+begin_src sql
+CREATE TABLE table_name (
+    name varchar(80),
+    area double,
+);
+#+end_src
+**** Delete table
+#+begin_src sql
+DROP TABLE table_name;
+#+end_src
 
 *** T-SQL
 :PROPERTIES:
@@ -785,6 +830,107 @@ In ~/config/package-solution.json~ add following:
     ]
 ...
 #+end_src
+*** Ensure all SPFX resources created
+When a web part is added to a site, we can first make sure that required lists are created so the user doesn't need to create them manually.
+
+A convenient way to do this is when property pane is opened:
+#+begin_src js
+protected async loadPropertyPaneResources(): Promise<void> {
+  return import(
+    /* webpackChunkName: 'MyWebPart' */
+    './property/PropertyComponent'
+  ).then(component => {
+    // Ensure all lists and fields are created
+    EnsureAllCreated();
+  });
+}
+#+end_src
+*** Sharepoint list
+**** Ensure list exists
+#+begin_src js
+const listEnsureResult = await sp.web.lists.ensure("My List");
+
+// check if the list was created, or if it already existed:
+if (listEnsureResult.created) {
+    console.log("My List was created!");
+} else {
+    console.log("My List already existed!");
+}
+
+// work on the created/updated list
+const r = await listEnsureResult.list.select("Id")();
+
+// log the Id
+console.log(r.Id);
+#+end_src
+*** Sharepoint fields
+**** Field types
+|-------------------+--------------------------------------------------------------------------------------------------------------------------------|
+| Member name       | Description                                                                                                                    |
+|-------------------+--------------------------------------------------------------------------------------------------------------------------------|
+| Invalid           | Must not be used. The value = 0.                                                                                               |
+| Integer           | Specifies that the field contains an integer value. The value = 1.                                                             |
+| Text              | Specifies that the field contains a single line of text. The value = 2.                                                        |
+| Note              | Specifies that the field contains multiple lines of text. The value = 3.                                                       |
+| DateTime          | Specifies that the field contains a date and time value or a date-only value. The value = 4.                                   |
+| Counter           | Specifies that the field contains a monotonically increasing integer. The value = 5.                                           |
+| Choice            | Specifies that the field contains a single value from a set of specified values. The value = 6.                                |
+| Lookup            | Specifies that the field is a lookup field. The value = 7.                                                                     |
+| Boolean           | Specifies that the field contains a Boolean value. The value = 8.                                                              |
+| Number            | Specifies that the field contains a floating-point number value. The value = 9.                                                |
+| Currency          | Specifies that the field contains a currency value. The value = 10.                                                            |
+| URL               | Specifies that the field contains a URI and an optional description of the URI. The value = 11.                                |
+| Computed          | Specifies that the field is a computed field. The value = 12.                                                                  |
+| Threading         | Specifies that the field indicates the thread for a discussion item in a threaded view of a discussion board. The value = 13.  |
+| Guid              | Specifies that the field contains a GUID value. The value = 14.                                                                |
+| MultiChoice       | Specifies that the field contains one or more values from a set of specified values. The value = 15.                           |
+| GridChoice        | Specifies that the field contains rating scale values for a survey list. The value = 16.                                       |
+| Calculated        | Specifies that the field is a calculated field. The value = 17.                                                                |
+| File              | Specifies that the field contains the leaf name of a document as a value. The value = 18.                                      |
+| Attachments       | Specifies that the field indicates whether the list item has attachments. The value = 19.                                      |
+| User              | Specifies that the field contains one or more users and groups as values. The value = 20.                                      |
+| Recurrence        | Specifies that the field indicates whether a meeting in a calendar list recurs. The value = 21.                                |
+| CrossProjectLink  | Specifies that the field contains a link between projects in a Meeting Work space site. The value = 22.                        |
+| ModStat           | Specifies that the field indicates moderation status. The value = 23.                                                          |
+| Error             | Specifies that the type of the field was set to an invalid value. The value = 24.                                              |
+| ContentTypeId     | Specifies that the field contains a content type identifier as a value. The value = 25.                                        |
+| PageSeparator     | Specifies that the field separates questions in a survey list onto multiple pages. The value = 26.                             |
+| ThreadIndex       | Specifies that the field indicates the position of a discussion item in a threaded view of a discussion board. The value = 27. |
+| WorkflowStatus    | Specifies that the field indicates the status of a workflow instance on a list item. The value = 28.                           |
+| AllDayEvent       | Specifies that the field indicates whether a meeting in a calendar list is an all-day event. The value = 29.                   |
+| WorkflowEventType | Specifies that the field contains the most recent event in a workflow instance. The value = 30.                                |
+| Geolocation       |                                                                                                                                |
+| OutcomeChoice     |                                                                                                                                |
+| MaxItems          | Must not be used. The value = 31.                                                                                              |
+|-------------------+--------------------------------------------------------------------------------------------------------------------------------|
+
+**** Add new field to a list
+#+begin_src js
+import { sp } from "@pnp/sp";
+import { IField } from "@pnp/sp/fields/types";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/fields";
+
+// create a new field called 'My Field' in web.
+const field: IFieldAddResult = await sp.web.fields.add("My Field", "SP.FieldText", { FieldTypeKind: 3, Group: "My Group" });
+// create a new field called 'My Field' in the list 'My List'
+const field2: IFieldAddResult = await sp.web.lists.getByTitle("My List").fields.add("My Field", "SP.FieldText", { FieldTypeKind: 3, Group: "My Group" });
+
+// we can use this 'field' variable to run more queries on the field:
+const r = await field.field.select("Id")();
+
+// log the field Id to console
+console.log(r.Id);
+#+end_src
+
+To add a use type field, use type SP.FieldUser
+#+begin_src js
+await list.fields.add("MyUser", "SP.FieldUser", { FieldTypeKind: 20 });
+#+end_src
+*** Create sharepoint JSON formats from html and css
+To create JSON format for a Sharepoint list from html and css, use:
+https://pnp.github.io/List-Formatting/tools/html-formatter-generator/
 ** Rust
 :PROPERTIES:
 :ID:       fb389731-9b2f-4380-98af-21ad3e832e66
@@ -801,3 +947,27 @@ In ~/config/package-solution.json~ add following:
 Cargo is the [[id:fb389731-9b2f-4380-98af-21ad3e832e66][Rust's]] package manager.
 
 Documentation can be found at https://doc.rust-lang.org/cargo/
+
+** CSS
+*** Collapsible element
+To make a collapsible element with Css, just transition the ~max-height~ property
+
+#+begin_src css
+.content {
+    max-height: 100vh; /* should be big enough to fit content */
+    overflow: hidden;
+    transition: max-height 1s linear;
+}
+
+/* Example */
+.content.collapsed {
+    max-height: 0;
+}
+#+end_src
+*** Positioning
+Possible values: ~sticky~, ~relative~, ~fixed~, ~absolute~ and ~sticky~.
+Be default, position is ~static~.
+With position ~relative~, the element will be positioned relative to it's normal (static) position. Properties ~left~, ~top~, ~right~, ~bottom~ can be used to move the element.
+Position ~fixed~ places the element relative to the viewport.
+Position ~abosolute~ is placed relative to the nearest positioned ancestor. (with position ~relative~). \\\*\\\*Absolute positioned elements are removed from normal document flow, and are not part of parent's width and height.
+Position ~sticky~ is a combination of ~relative~ and ~fixed~ position. And it depends on current user's scroll position. \*\*For ~sticky~ positioning to work, at least one of ~left~, ~right~, ~top~, ~bottom~ properties need to be specified.\*\* Useful to implement things like sticky headers as you scroll. (the ones that remain on the top when you scroll past them).

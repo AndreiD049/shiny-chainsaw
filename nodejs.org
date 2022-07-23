@@ -182,6 +182,49 @@ module.exports = {
     ],
 }
 #+end_src
+*** Creating a umd library using webpack
+To create a library that exposes a variable like jquery, using Webpack, but also is available as a common js module:
+
+In your js/ts file, export the necessary functions:
+#+begin_src js
+export default function a(text) {
+    console.log(text);
+}
+#+end_src
+
+In your config file:
+#+begin_src js
+module.exports = {
+  mode: // ...,
+    // ...
+  output: {
+        // ...
+    globalObject: 'this', // <-- this is needed so library can be required as a commonjs module
+    library: {
+      name: 'myLibraryName', // <-- this variable will be exposed by your bundle
+      type: 'umd',
+    },
+  },
+#+end_src
+
+Then you can include it in your html:
+#+begin_src html
+<script src="https://example.org/path/to/mybundle.js"></script>
+<script>
+  myLibraryName.a('webpack');
+</script>
+#+end_src
+
+Or js:
+#+begin_src js
+const myLib = require('myLibrary');
+#+end_src
+
+See:
+- [[https://webpack.js.org/configuration/output/#outputlibrary]]
+- [[https://webpack.js.org/guides/author-libraries/]]
+- [[https://webpack.js.org/configuration/output/#outputglobalobject]]
+
 ** Common js modules
 Common js modules are the modules using require function. This is the native mechanism used in [[id:6c94391a-b52c-4308-93bc-d770b29857fc][Node js]]. (at least it was before Es modules appeared). Each file is considered a module. Objects like require, module and others are available thanks to Module wrapping.
 *** Module wrapping
@@ -339,3 +382,11 @@ if (somethingIsTrue) {
 It is used by calling ~import~ as a function and providing. It returns a ~Promise~ containing the imported package. Also, you can ~await~ a dynamic import with a top level await (Experimental). Using dynamic imports, you can use es modules from CommonJs modules modules or vice versa.
 
 **WARNING**: using Dynamic import disables such useful features as Tree shaking done by static analyzers. Use it wisely.
+** Data attributes
+Data attributes are special type of html attributes:
+
+#+begin_src html
+<a data-open="true" href="...">...
+#+end_src
+
+From js, this attribute can be accessed by using ~.getAttribute()~ specifying the full name ~data-open~. But there is a more convenient way: using the ~dataset~ property. You could access it like this ~el.dataset.open~.
