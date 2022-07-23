@@ -234,6 +234,9 @@ When working on a feature, i will usually follow below steps:
 2. Make it fast
 3. Make it pretty
 4. Make it clean (refactor)
+*** Cheat Sheets
+Good online cheat sheets - [[https://devhints.io/]]
+Command line cheat sheet - [[https://cheat.sh/]]
 ** Algorithms
 Here i will document my solutions to various leetcode questions. I will first attempt to solve them in Python or Javascript
 
@@ -505,6 +508,9 @@ function doSomething(fn: CallableWithProps) {
    fn("test");
 }
 #+end_src
+
+#+RESULTS:
+
 ** Powershell
 *** Create ssh key in windows and add it to github
 :PROPERTIES:
@@ -574,6 +580,12 @@ Alter the role afterwards - ~ALTER ROLE rast999 WITH CREATEDB CREATEROLE LOGIN R
 ***** Set a new password
 Setting new password is the same ~ALTER ROLE sample WITH PASSWORD 'newpassword';~
 *** T-SQL
+**** Category of statements in T-SQL
+There are 3 base categories of statements in T-SQL:
+
+- DML (Data Manipulation Language) - statements used to insert data (INSERT, UPDATE, DELETE) or query information from database (SELECT)
+- DDL (Data Definition Language) - statments used to define the database schema and create tables (CREATE, ALTER, DROP)
+- DCL (Data Control Language) - statements used to manage users and their permissions (GRANT, REVOKE, DENY)
 **** 3VL or Ternary logic
 Ternary logic in T-SQL represents predicates which may have 3 values:
 
@@ -585,7 +597,7 @@ Rules of ternary logic:
 
 Any comparison of 2 =UNKNOWNs= is also =UNKNWON=
 Comparison of any =KNOWN= value to =UNKNOWN= value is also =UNKNOWN=
-A State predicate (a strict Yes or No question), always evaluates to =TRUE= or =FALSE=
+A State predicate (a str    ict Yes or No question), always evaluates to =TRUE= or =FALSE=
 **** Aggregate functions
 Aggregate functions are the ones that take multiple values, and return a single value. Examples of aggregate functions:
 
@@ -595,6 +607,25 @@ Aggregate functions are the ones that take multiple values, and return a single 
 4. COUNT
 
 Source: https://docs.microsoft.com/en-us/sql/t-sql/functions/aggregate-functions-transact-sql?view=sql-server-ver16
+**** CASE operator
+#+begin_src sql
+SELECT name,
+    CASE WHEN (monthlymaintenance > 100) THEN
+      'expensive'
+    ELSE
+      'cheap'
+    END AS cost
+    FROM cd.facilities;
+#+end_src
+
+Will return something like this:
+
+|--------+-----------|
+| name   | cost      |
+|--------+-----------|
+| Court1 | cheap     |
+| Court2 | expensive |
+|--------+-----------|
 ** Elisp (emacs-lisp)
 *** Hello world
 #+begin_src elisp
@@ -735,3 +766,19 @@ In ~/config/package-solution.json~ add following:
     ]
 ...
 #+end_src
+** Rust
+:PROPERTIES:
+:ID:       fb389731-9b2f-4380-98af-21ad3e832e66
+:END:
+*** Resources
+- https://github.com/joaocarvalhoopen/How_to_learn_modern_Rust
+- [[https://www.rust-lang.org/learn]]
+- [[https://www.freecodecamp.org/news/rust-in-replit/]]
+- [[https://youtube.com/c/JonGjengset]]
+- [[https://dystroy.org/blog/how-not-to-learn-rust/]]
+- [[https://cheats.rs/]]
+- [[https://learning-rust.github.io/docs/d1.code_organization.html]]
+*** Cargo
+Cargo is the [[id:fb389731-9b2f-4380-98af-21ad3e832e66][Rust's]] package manager.
+
+Documentation can be found at https://doc.rust-lang.org/cargo/
