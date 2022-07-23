@@ -105,8 +105,7 @@ An image is just a link without protocol
 
 **** Display inline image
 To display the image inline, use =C-c C-x C-v= (/org-toggle-inline-images/)
-As an alternative, set the startup buffer variable at the top of the file (see
-[[info:org#In-buffer Settings][info:org#In-buffer Settings]])
+As an alternative, set the startup buffer variable at the top of the file (see In-buffer settings manual page)
 
 #+begin_example
 #+STARTUP: inlineimages
@@ -153,7 +152,7 @@ Notes on emacs itse
 
 **** Specify another directory
 
-For more info, see [[info:emacs#Backup][manual]] To stop emacs from making backup files in
+For more info, see info:emacs#Backup To stop emacs from making backup files in
 the same directory, you can add following to your =init.el= file:
 
 #+begin_src emacs-lisp
@@ -767,7 +766,7 @@ it's definition
 : multiply-by-seven
 **** Interactive arguments
 There are more characters that can be passed to ~interactive~ as arguments.
-See [[info:elisp#Interactive Codes][info:elisp#Interactive]]
+See info:elisp#Interactive Codes
 *** Predicates and boolean tests in elisp
 :PROPERTIES:
 :ID:       1d004eef-7276-403b-9ac8-d311d619f3e4

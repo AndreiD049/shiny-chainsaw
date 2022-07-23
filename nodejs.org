@@ -25,7 +25,7 @@ Typescript is configured with ~tsconfig.json~
 
 Same as ~package.json~ for typescript. Specifies options for Typescript compilation.
 
-**** Useful commands
+**** Useful properties
 - ~target~ will specify to which features in your code will get downgraded. For example ~${temlate} string~ might be downgraded to string concatenation. Using ~es6~ is a strong choice, but all depends.
 - ~module~ - which module type is generated? (CommonJs, ES modules, etc...)
 - ~noImplicitAny~ - will throw an error in all places where type is ~any~ or is implicitly made ~any~.
