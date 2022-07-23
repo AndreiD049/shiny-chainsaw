@@ -234,6 +234,84 @@ When working on a feature, i will usually follow below steps:
 2. Make it fast
 3. Make it pretty
 4. Make it clean (refactor)
+** Algorithms
+Here i will document my solutions to various leetcode questions. I will first attempt to solve them in Python or Javascript
+
+The attempt is to do an explanation of all the questions from this [[https://docs.google.com/spreadsheets/d/1sfaK42jUUNIz9_jsQViWCMR5B2_cos_KD31bKI-5bEg/edit#gid=0][list]]
+*** Best time to buy
+#+begin_example
+You are given an array prices where prices[i] is the price of a given stock on the ith day.
+
+You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.
+
+Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.
+#+end_example
+
+**** Solution
+
+Solution to this problem is of complexity ~O(n)~. Also called sliding-window technique The idea is to have two pointers. One pointing at the current lowest price, and the other at the current examined price. Also, we want to keep track of the maximum profit made during the loop. So, while we move through the list, we should keep track of 3 things:
+
+-   the minimum price that we encountered so far
+-   The maximum profit we could get
+-   the current price we're at
+
+This problem can be also solved using [[https://www.geeksforgeeks.org/largest-sum-contiguous-subarray][Kodane's algorithm]] also known as ~largest sum of contiguous subarray~.
+*** Binary search
+Binary search is performed on sorted collections and has a complexity of O(log n). It is part of Divide and Conquer algorithms and the key target in each step is to make the solution domain smaller, by eliminating portions that don't satisfy the requirements.
+*** Binary search in a rotated sorted array :ATTACH:
+:PROPERTIES:
+:ID:       55e25b1a-4033-42df-943b-ae903ee65f0c
+:END:
+Source: [[https://leetcode.com/problems/search-in-rotated-sorted-array/][https://leetcode.com/problems/search-in-rotated-sorted-array/]]
+
+#+begin_example
+There is an integer array nums sorted in ascending order (with distinct values).
+
+Prior to being passed to your function, nums is possibly rotated at an unknown pivot index k (1 <= k < nums.length) such that the resulting array is [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]] (0-indexed). For example, [0,1,2,4,5,6,7] might be rotated at pivot index 3 and become [4,5,6,7,0,1,2].
+
+Given the array nums after the possible rotation and an integer target, return the index of target if it is in nums, or -1 if it is not in nums.
+
+You must write an algorithm with O(log n) runtime complexity.
+#+end_example
+
+**** Solution
+
+Again, we see the array is sorted and that we need to solve the problem in `O(log n)` time. This almost always means binary-search, so we need to have a left, right, and middle pointer. The key concept to understand, when we take a mid pointer, which portion is sorted relative to this pointer, left or right?
+
+[[attachment:Solution1.png]]
+
+This is easy to check if we know what is the leftmost value of the array (and we know it). If `left <= mid` then left part is sorted, else the right part is sorted. Now that we know which part is sorted, we can check if our `target` is within that sorted part. If it is, then discard the other portion, and vice versa.
+
+[[attachment:Solution2.png]]
+
+In above example, target was not in our sorted (left) part, so we just discarded it and continue the search in the remaining portion.
+
+#+begin_src python
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        left = 0
+        right = len(nums) - 1
+        while left <= right:
+            mid = (left + right) // 2
+            if nums[mid] == target:
+                return mid;
+           # Is the left part sorted?
+            if nums[left] <= nums[mid]:
+                # Left part is sorted
+                if nums[left] <= target < nums[mid]:
+                    # search the left part
+                    right = mid - 1
+                else:
+                    left = mid + 1
+            else:
+                # Right part is sorted
+                if nums[mid] < target <= nums[right]:
+                    # search right
+                    left = mid + 1
+                else:
+                    right = mid - 1
+        return -1
+#+end_src
 ** Chrome extension development
 *** Creating a manifest
 :PROPERTIES:
@@ -296,13 +374,26 @@ Create a manifest in the root of the project
 Popular testing framework in JavaScript and node.
 
 Examples and docs: [[https://jestjs.io/][https://jestjs.io/]]
-*** Add jest to a project (with babel)
+**** Add jest to a project (with babel)
 1.  Install [[id:4e8cb1ee-18bb-478d-85be-62a166b71cd0][Jest]] with ~npm i -D jest~
 2.  If you wish to use Babel, for example you want typescript - ~npm i -D babel-jest @babel/core @babel/preset-env~ and add to ~babel.config.js~:
 
 #+begin_src js
 module.exports = {
   presets: [['@babel/preset-env', {targets: {node: 'current'}}]],
+};
+#+end_src
+**** Add typescript to jest
+If you want to add typescript support, ~npm i --D @babel/preset-typescript @types/jest~
+
+Then add ~@babel/preset-typescript~ to the list of presets in your ~babel.config.js~.
+
+#+begin_src js
+module.exports = {
+  presets: [
+    ['@babel/preset-env', {targets: {node: 'current'}}],
+    '@babel/preset-typescript', // <-- this
+  ],
 };
 #+end_src
 *** Add prettier to project
@@ -321,7 +412,48 @@ module.exports = {
   singleQuote: true,
 };
 #+end_src
+*** Webpack
+:PROPERTIES:
+:ID:       30de9951-46cc-45cc-8d74-98d53664569b
+:END:
+Webpack is a code bundler
+**** Add Webpack to a project
+To add [[id:30de9951-46cc-45cc-8d74-98d53664569b][Webpack]] to your project:
+
+1.  ~npm i -D webpack webpack-cli [webpack-dev-server]~
+2.  Create a ~webpack.config.js~
+
+#+begin_src js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+    mode: 'development',
+    entry: __dirname + '/index.ts',
+    output: {
+        path: __dirname + '/dist',
+        filename: 'index.js',
+        publicPath: '/'
+    },
+    resolve: {
+        extensions: ['.ts', '.js'],
+    },
+    module: {
+        rules: [ ]
+    },
+    // this plugin is necessary if you want your bundle to be added to a html while developing
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: __dirname + '/public/index.html',
+            inject: 'body',
+            publicPath: __dirname + '/public'
+        })
+    ],
+}
+#+end_src
 ** Typescript
+:PROPERTIES:
+:ID:       2291a412-ed3a-4b26-a489-ab11deafee44
+:END:
 For basic documentation on typescript see the [[https://www.typescriptlang.org/docs/handbook/2/basic-types.html][Documentation]]
 *** Add typescript to webpack
 -  Install ~ts-loader~
@@ -359,7 +491,20 @@ Resources on typescript:
 *** Classes
 Classes documentation can be found [[https://www.typescriptlang.org/docs/handbook/2/classes.html][here]]
 *** Functions
-test
+**** Call signature
+If you want to have a callable object type with some properties in [Typescript](https://andreid049.github.io/no-brainer//#Typescript), you need a `call sugnature`
+
+#+begin_src js
+type CallableWithProps = {
+    property: string;
+    (name: string): void;
+}
+
+function doSomething(fn: CallableWithProps) {
+   console.log(fn.property);
+   fn("test");
+}
+#+end_src
 ** Powershell
 *** Create ssh key in windows and add it to github
 :PROPERTIES:
@@ -421,8 +566,15 @@ if (-Not (Test-Path -Path $paths)) {
    # Logic
 }
 #+end_src
-** T-SQL
-*** 3VL or Ternary logic
+** Databases
+*** Postgres SQL
+**** Alter user role in Postgres
+***** Change role
+Alter the role afterwards - ~ALTER ROLE rast999 WITH CREATEDB CREATEROLE LOGIN REPLICATION;~
+***** Set a new password
+Setting new password is the same ~ALTER ROLE sample WITH PASSWORD 'newpassword';~
+*** T-SQL
+**** 3VL or Ternary logic
 Ternary logic in T-SQL represents predicates which may have 3 values:
 
 1. TRUE
@@ -434,7 +586,7 @@ Rules of ternary logic:
 Any comparison of 2 =UNKNOWNs= is also =UNKNWON=
 Comparison of any =KNOWN= value to =UNKNOWN= value is also =UNKNOWN=
 A State predicate (a strict Yes or No question), always evaluates to =TRUE= or =FALSE=
-*** Aggregate functions
+**** Aggregate functions
 Aggregate functions are the ones that take multiple values, and return a single value. Examples of aggregate functions:
 
 1. MAX
@@ -567,3 +719,19 @@ The template for this function looks like this
    ...
   LAST-EXPRESSION-IN-BODY)
 #+end_example
+** Sharepoint
+*** API permissions setup in sharepoint
+Setup Graph API permissions
+
+In ~/config/package-solution.json~ add following:
+
+#+begin_src js
+...
+"webApiPermissionRequests": [
+      {
+        "resource": "Microsoft Graph",
+        "scope": "User.ReadBasic.All"
+      }
+    ]
+...
+#+end_src
