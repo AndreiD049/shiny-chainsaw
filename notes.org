@@ -315,6 +315,18 @@ class Solution:
                     right = mid - 1
         return -1
 #+end_src
+*** Contains duplicate
+Source: [[https://leetcode.com/problems/contains-duplicate]]
+
+#+begin_example
+Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.
+#+end_example
+
+**** Solution
+There are 2 possible solutions that appear to me as optimal:
+
+1. Sort the array first. It is easy to find out if there are duplicates in a sorted array. The complexity will be then equal to the complexity of sorting. This is a more memory efficient method.
+2. Use a hash map to identify if an element was previously found
 ** Chrome extension development
 *** Getting started
 1. Open link in chrome `chrome://extensions`
@@ -433,255 +445,6 @@ Content scripts contain code that is meant to be inserted to the page's DOM and 
 Static script and css injection is done via manifest file. Using `content_scripts` property (see [[id:971eea90-a5a4-45c6-b8c6-42b6d54a4150][Creating a manifest]])
 **** Dynamic injection
 Dynamic script injection can be done at runtime in response to events. It's done using ~chrome.scripting.executeScript~ (see [[https://developer.chrome.com/docs/extensions/reference/scripting/#method-executeScript][documentation]])
-** Node js and Javascript
-:PROPERTIES:
-:ID:       6c94391a-b52c-4308-93bc-d770b29857fc
-:END:
-*** Add eslint to project
--   Install eslint – ~npm i -D eslint~
--   Run – ~npx eslint --init~
--   Choose appropriate steps in the wizard
-*** Jest
-:PROPERTIES:
-:ID:       4e8cb1ee-18bb-478d-85be-62a166b71cd0
-:END:
-Popular testing framework in JavaScript and node.
-
-Examples and docs: [[https://jestjs.io/][https://jestjs.io/]]
-**** Add jest to a project (with babel)
-1.  Install [[id:4e8cb1ee-18bb-478d-85be-62a166b71cd0][Jest]] with ~npm i -D jest~
-2.  If you wish to use Babel, for example you want typescript - ~npm i -D babel-jest @babel/core @babel/preset-env~ and add to ~babel.config.js~:
-
-#+begin_src js
-module.exports = {
-  presets: [['@babel/preset-env', {targets: {node: 'current'}}]],
-};
-#+end_src
-**** Add typescript to jest
-If you want to add typescript support, ~npm i --D @babel/preset-typescript @types/jest~
-
-Then add ~@babel/preset-typescript~ to the list of presets in your ~babel.config.js~.
-
-#+begin_src js
-module.exports = {
-  presets: [
-    ['@babel/preset-env', {targets: {node: 'current'}}],
-    '@babel/preset-typescript', // <-- this
-  ],
-};
-#+end_src
-*** Add prettier to project
-**** Install
-
-~npm i -D prettier~
-
-**** Config file
-
-#+begin_src js
-// prettier.config.js or .prettierrc.js
-module.exports = {
-  trailingComma: "es5",
-  tabWidth: 4,
-  semi: true,
-  singleQuote: true,
-};
-#+end_src
-*** Webpack
-:PROPERTIES:
-:ID:       30de9951-46cc-45cc-8d74-98d53664569b
-:END:
-Webpack is a code bundler
-**** Add Webpack to a project
-To add [[id:30de9951-46cc-45cc-8d74-98d53664569b][Webpack]] to your project:
-
-1.  ~npm i -D webpack webpack-cli [webpack-dev-server]~
-2.  Create a ~webpack.config.js~
-
-#+begin_src js
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-
-module.exports = {
-    mode: 'development',
-    entry: __dirname + '/index.ts',
-    output: {
-        path: __dirname + '/dist',
-        filename: 'index.js',
-        publicPath: '/'
-    },
-    resolve: {
-        extensions: ['.ts', '.js'],
-    },
-    module: {
-        rules: [ ]
-    },
-    // this plugin is necessary if you want your bundle to be added to a html while developing
-    plugins: [
-        new HtmlWebpackPlugin({
-            template: __dirname + '/public/index.html',
-            inject: 'body',
-            publicPath: __dirname + '/public'
-        })
-    ],
-}
-#+end_src
-*** Common js modules
-Common js modules are the modules using require function. This is the native mechanism used in [[id:6c94391a-b52c-4308-93bc-d770b29857fc][Node js]]. (at least it was before Es modules appeared). Each file is considered a module. Objects like require, module and others are available thanks to Module wrapping.
-**** Module wrapping
-Before a commonjs module is executed, it's contents are wrapped in a function. It looks approximatively like this:
-
-#+begin_src js
-(function(exports, require, module, __filename, __dirname) {
- /* Module contents */
-});
-#+end_src
-
-This helps encapsulation, and provides useful local variables:
-
--   ~exports~: alias for ~module.exports~
--   ~require~: function for requiring other modules. Require returns the common js module's ~exports~ object.
--   ~module~: reference to the current module
--   ~__filename~ and ~__dirname~: representing current filename and directory name
-**** The ~.mjs~ extension
-It is not possible to ~require()~ files that have the ~.mjs~ extension. Attempting to do so will throw an error. The .mjs extension is reserved for ~Es modules~ which cannot be loaded via ~require()~.
-**** Module resolution
-If exact file name is not found. Node.js will attempt to find a file with ~.js~, ~.json~, or ~.node~ extensions.
-
-Also, depending on path prefix:
-- ~/~ means path to the module is absolute
-- ~./~, ~../~ etc. means path to the module is relative
-- if there is no prefix, it's either a core module (ex: path), or it will be looked up in node_modules folder If none of above work, ~require~ will throw a ~MODULE_NOT_FOUND~ exception.
-
-In order for Node js to be able to recognize a folder as a module, it should meet any of below criteria:
-- Folder should have a `package.json` with a `main` field in it. In below case, `require('./my-module')` will load and run `./my-module/lib/my-module.js`
-#+begin_src js
-{
-  "name": "my-module",
-  "main: "./lib/my-module.js"
-}
-#+end_src
-
-- In case no ~package.json~ is found, Node.js will look for ~index.js~ or ~index.node~ files.
-*** Common js cycle
-Sometimes common js modules depend on one another. In this case, an object might receive a dependency that was not loaded completely. For example:
-
-~a.js~:
-#+begin_src js
-console.log('a starting');
-exports.done = false;
-const b = require('./b.js');
-console.log('in a, b.done = %j', b.done);
-exports.done = true;
-console.log('a done');
-#+end_src
-
-~b.js~:
-#+begin_src js
-console.log('b starting');
-exports.done = false;
-const a = require('./a.js');
-console.log('in b, a.done = %j', a.done);
-exports.done = true;
-console.log('b done');
-#+end_src
-
-~main.js~:
-#+begin_src js
-console.log('main starting');
-const a = require('./a.js');
-const b = require('./b.js');
-console.log('in main, a.done = %j, b.done = %j', a.done, b.done);
-#+end_src
-
-The output of above will be:
-#+begin_src text
-main starting
-a starting
-b starting
-in b, a.done=false
-b done
-in a, b.done=true
-a done
-in main, a.done = true, b.done = true
-#+end_src
-** Typescript
-:PROPERTIES:
-:ID:       2291a412-ed3a-4b26-a489-ab11deafee44
-:END:
-For basic documentation on typescript see the [[https://www.typescriptlang.org/docs/handbook/2/basic-types.html][Documentation]]
-*** Compilation
-Compilation of files can be done in any of the following ways:
-
--   ~tsc~ to compile the nearby project (recognized via [[id:da390266-7df1-4692-80eb-e19a3df1c11e][tsconfig]].
--   ~tsc somfile.ts~ compile a single file
--   ~tsc --project othertsconfig.json~
--   ~tsc index.js --declaration --emitDeclarationOnly~
--   ~tsc src/*.ts~ compile all .ts files in ~src~ folder.
--   ~tsc one.ts two.ts --target esnext --outFile index.js~ combine two files
-*** Config file
-:PROPERTIES:
-:ID:       da390266-7df1-4692-80eb-e19a3df1c11e
-:END:
-Typescript is configured with ~tsconfig.json~
-
-Same as ~package.json~ for typescript. Specifies options for Typescript compilation.
-
-**** Useful commands
-- ~target~ will specify to which features in your code will get downgraded. For example ~${temlate} string~ might be downgraded to string concatenation. Using ~es6~ is a strong choice, but all depends.
-- ~module~ - which module type is generated? (CommonJs, ES modules, etc...)
-- ~noImplicitAny~ - will throw an error in all places where type is ~any~ or is implicitly made ~any~.
-- ~strictNullChecks~ - helps to handle ~null~ and ~undefined~, especially in cases where a value was not initialized and still used
-*** Add typescript to webpack
--  Install ~ts-loader~
--  Add a rule to your ~webpack.config.js~
-
-#+begin_src js
-rules: [
-    {
-        test: /.tsx?$/,
-        use: [
-            {
-                loader: 'ts-loader', options: { transpileOnly: true }
-            }
-        ]
-    }
-]
-#+end_src
-
-You might want to add this to your ~webpack.config.js~ as well:
-
-#+begin_src js
-module.exports {
-    // ...
-    entry: //...
-    // ...
-    resolve: {
-        extensions: ['.ts', '.js'],
-    },
-    // ...
-}
-#+end_src
-*** Resources
-Resources on typescript:
-- Documentation: [[https://www.typescriptlang.org/docs/handbook/intro.html]]
-*** Classes
-Classes documentation can be found [[https://www.typescriptlang.org/docs/handbook/2/classes.html][here]]
-*** Functions
-**** Call signature
-If you want to have a callable object type with some properties in [Typescript](https://andreid049.github.io/no-brainer//#Typescript), you need a `call sugnature`
-
-#+begin_src js
-type CallableWithProps = {
-    property: string;
-    (name: string): void;
-}
-
-function doSomething(fn: CallableWithProps) {
-   console.log(fn.property);
-   fn("test");
-}
-#+end_src
-
-#+RESULTS:
 ** Powershell
 *** Create ssh key in windows and add it to github
 :PROPERTIES:
@@ -750,6 +513,19 @@ if (-Not (Test-Path -Path $paths)) {
 Alter the role afterwards - ~ALTER ROLE rast999 WITH CREATEDB CREATEROLE LOGIN REPLICATION;~
 ***** Set a new password
 Setting new password is the same ~ALTER ROLE sample WITH PASSWORD 'newpassword';~
+**** Create postgres database
+To create a new database:
+#+begin_src sh
+createdb mydb
+
+# if you want to create a database with the current user name, just use
+createdb
+
+# to delete a database
+dropdb mydb
+#+end_src
+
+It might be that you will get this error - ~createdb: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL: role "rast999" does not exist~. This means that postgres was installed under role ~postgres~ and before logging in you will need to create a new role for your normal user (ex. for ~rast999~). See [[id:a3259d0d-56dd-4eef-8d1c-978efd931b66][Create postgres role]].
 **** Check if Postgres service is running
 To check if the service is running on Linux:
 ~sudo service postgresql status~
@@ -766,6 +542,32 @@ SELECT surname
 SELECT name
   FROM cd.facilities;
 #+end_src
+**** List users in postgres
+:PROPERTIES:
+:ID:       0ef0a298-1609-425d-9547-93ffb7e70649
+:END:
+To list the users, run ~SELECT rolname FROM pg_roles;~ (note the ~;~ at the end). Or, you can from run ~\du~ meta-command Sample output:
+
+| Role name | Attributes                                                 | Member of |
+|-----------+------------------------------------------------------------+-----------|
+| postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}        |
+| rast999   |                                                            | {}        |
+**** Create postgres role
+:PROPERTIES:
+:ID:       a3259d0d-56dd-4eef-8d1c-978efd931b66
+:END:
+In a fresh postgres installation, you cannot just connect to database from your normal user (ex. rast999). Instead, you will need first to create a role (aka user) in postgres for it.
+
+To do this:
+- login as user ~postgres~: ~sudo su postgres~
+- run ~psql~, then ~CREATE ROLE name~ or just ~createuser name~ from command line
+
+Note: This will create a simple role without any privileges.
+
+To grant role privileges you can:
+Specify them at creation time - ~CREATE ROLE rast999 CREATEDB CREATEROLE LOGIN REPLICATION;~
+In order to check which users are currently created, see [[id:0ef0a298-1609-425d-9547-93ffb7e70649][List users in postgres]]
+
 *** T-SQL
 :PROPERTIES:
 :ID:       a05ed9e6-09fe-49fd-aa4f-8e1db8d1976c
