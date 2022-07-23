@@ -434,6 +434,9 @@ Static script and css injection is done via manifest file. Using `content_script
 **** Dynamic injection
 Dynamic script injection can be done at runtime in response to events. It's done using ~chrome.scripting.executeScript~ (see [[https://developer.chrome.com/docs/extensions/reference/scripting/#method-executeScript][documentation]])
 ** Node js and Javascript
+:PROPERTIES:
+:ID:       6c94391a-b52c-4308-93bc-d770b29857fc
+:END:
 *** Add eslint to project
 -   Install eslint – ~npm i -D eslint~
 -   Run – ~npx eslint --init~
@@ -521,6 +524,43 @@ module.exports = {
     ],
 }
 #+end_src
+*** Common js modules
+Common js modules are the modules using require function. This is the native mechanism used in [[id:6c94391a-b52c-4308-93bc-d770b29857fc][Node js]]. (at least it was before Es modules appeared). Each file is considered a module. Objects like require, module and others are available thanks to Module wrapping.
+**** Module wrapping
+Before a commonjs module is executed, it's contents are wrapped in a function. It looks approximatively like this:
+
+#+begin_src js
+(function(exports, require, module, __filename, __dirname) {
+ /* Module contents */
+});
+#+end_src
+
+This helps encapsulation, and provides useful local variables:
+
+-   ~exports~: alias for ~module.exports~
+-   ~require~: function for requiring other modules. Require returns the common js module's ~exports~ object.
+-   ~module~: reference to the current module
+-   ~__filename~ and ~__dirname~: representing current filename and directory name
+**** The ~.mjs~ extension
+It is not possible to ~require()~ files that have the ~.mjs~ extension. Attempting to do so will throw an error. The .mjs extension is reserved for ~Es modules~ which cannot be loaded via ~require()~.
+**** Module resolution
+If exact file name is not found. Node.js will attempt to find a file with ~.js~, ~.json~, or ~.node~ extensions.
+
+Also, depending on path prefix:
+- ~/~ means path to the module is absolute
+- ~./~, ~../~ etc. means path to the module is relative
+- if there is no prefix, it's either a core module (ex: path), or it will be looked up in node_modules folder If none of above work, ~require~ will throw a ~MODULE_NOT_FOUND~ exception.
+
+In order for Node js to be able to recognize a folder as a module, it should meet any of below criteria:
+- Folder should have a `package.json` with a `main` field in it. In below case, `require('./my-module')` will load and run `./my-module/lib/my-module.js`
+#+begin_src js
+{
+  "name": "my-module",
+  "main: "./lib/my-module.js"
+}
+#+end_src
+
+- In case no ~package.json~ is found, Node.js will look for ~index.js~ or ~index.node~ files.
 *** Common js cycle
 Sometimes common js modules depend on one another. In this case, an object might receive a dependency that was not loaded completely. For example:
 
