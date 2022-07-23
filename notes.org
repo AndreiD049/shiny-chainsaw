@@ -1,6 +1,6 @@
 #+STARTUP: inlineimages overview
 
-* Everything goes here  
+* Everything goes here
 ** Org mode
 :PROPERTIES:
 :ID:       5c2ad23d-b530-4671-bd70-05380e417f81
@@ -125,6 +125,24 @@ If you have a code/source block and you want to edit it in it's own language
 mode, you can press =C-c '= and a new buffer will be opened where you can edit
 the code. Then, after you're done, press =C-c '= again and code will be
 transferred to org mode source block
+*** Attachments :ATTACH:
+To attach a file to an org document, use the ~M-x org-attach~ command
+It will present you some options on what to attach.
+To attach images, you can use packages like ~org-download~ or ~org-attach-screenshot~ but it's hardly worth it, ~org-attach-screenshot~ was even crashing my machine.
+
+Setting up below in your init.el file will actually store a link to the attachment, so it can be easily inserted as a link
+#+begin_src emacs-lisp
+(setq org-attach-store-link-p 'attached)
+#+end_src
+
+Example below:
+- Attach the file using ~C-c C-a u~ and pasting the url
+- Link the file using ~C-c C-l~ and selecting the attached file
+- (Optional) adding the ~#+attr_org~ parameters to set file width
+
+#+attr_org: :width 500
+[[attachment:1200px-Org-mode-unicorn.svg.png]]
+
 ** Emacs
 :PROPERTIES:
 :ID:       b01035fa-063f-410e-9ea9-94167530cc02
@@ -216,18 +234,133 @@ When working on a feature, i will usually follow below steps:
 2. Make it fast
 3. Make it pretty
 4. Make it clean (refactor)
+** Chrome extension development
+*** Creating a manifest
+:PROPERTIES:
+:ID:       971eea90-a5a4-45c6-b8c6-42b6d54a4150
+:END:
+Create a manifest in the root of the project
+#+begin_src text
+{
+  "name": "Getting Started Example",
+  "description": "Build an Extension!",
+  "version": "1.0",
+  "manifest_version": 3,
+    // File to run in background
+    "background": {
+    "service_worker": "background.js"
+  },
+  // Static content scripts
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["./scripts/main.js"],
+            "run_at": "document_idle"
+    }
+  ],
+    // Add permissions that the extension will need
+    "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "folder/icon.png",
+      "32": "folder/icon.png",
+      "48": "folder/icon.png",
+      "128": "folder/icon.png"
+    }
+  },
+  "icons": {
+    "16": "./images/get_started16.png",
+    "32": "./images/get_started32.png",
+    "48": "./images/get_started48.png",
+    "128": "./images/get_started128.png"
+  }
+}
+#+end_src
+*** Add icons to chrome extension
+-   Add images of different sizes into the project folder. (16, 32, 48, 128).
+-   Add `default_icon` property to [[id:971eea90-a5a4-45c6-b8c6-42b6d54a4150][manifest]]
+*** Add options page in chrome extension
+-   Create a html file that will be shown on options (example `options.html`)
+-   Add `options_page` property to the [[id:971eea90-a5a4-45c6-b8c6-42b6d54a4150][manifest]]
+-   Additionally, add respective javascript files
+** Node js
+*** Add eslint to project
+-   Install eslint – ~npm i -D eslint~
+-   Run – ~npx eslint --init~
+-   Choose appropriate steps in the wizard
+*** Jest
+:PROPERTIES:
+:ID:       4e8cb1ee-18bb-478d-85be-62a166b71cd0
+:END:
+Popular testing framework in JavaScript and node.
 
+Examples and docs: [[https://jestjs.io/][https://jestjs.io/]]
+*** Add jest to a project (with babel)
+1.  Install [[id:4e8cb1ee-18bb-478d-85be-62a166b71cd0][Jest]] with ~npm i -D jest~
+2.  If you wish to use Babel, for example you want typescript - ~npm i -D babel-jest @babel/core @babel/preset-env~ and add to ~babel.config.js~:
+
+#+begin_src js
+module.exports = {
+  presets: [['@babel/preset-env', {targets: {node: 'current'}}]],
+};
+#+end_src
+*** Add prettier to project
+**** Install
+
+~npm i -D prettier~
+
+**** Config file
+
+#+begin_src js
+// prettier.config.js or .prettierrc.js
+module.exports = {
+  trailingComma: "es5",
+  tabWidth: 4,
+  semi: true,
+  singleQuote: true,
+};
+#+end_src
 ** Typescript
-
 For basic documentation on typescript see the [[https://www.typescriptlang.org/docs/handbook/2/basic-types.html][Documentation]]
+*** Add typescript to webpack
+-  Install ~ts-loader~
+-  Add a rule to your ~webpack.config.js~
+
+#+begin_src js
+rules: [
+    {
+        test: /.tsx?$/,
+        use: [
+            {
+                loader: 'ts-loader', options: { transpileOnly: true }
+            }
+        ]
+    }
+]
+#+end_src
+
+You might want to add this to your ~webpack.config.js~ as well:
+
+#+begin_src js
+module.exports {
+    // ...
+    entry: //...
+    // ...
+    resolve: {
+        extensions: ['.ts', '.js'],
+    },
+    // ...
+}
+#+end_src
 *** Resources
 Resources on typescript:
 - Documentation: [[https://www.typescriptlang.org/docs/handbook/intro.html]]
 *** Classes
 Classes documentation can be found [[https://www.typescriptlang.org/docs/handbook/2/classes.html][here]]
 *** Functions
-test                                                                                                    
-** Powershell                                                                                                                                                                                       
+test
+** Powershell
 *** Create ssh key in windows and add it to github
 :PROPERTIES:
 :ID:       e1d81e89-b499-42a8-a2d2-368d0a23e8d5
@@ -257,12 +390,12 @@ There are 2 types of files in windows, soft and hard.
 > New-Item -ItemType HardLink -Path "PathWhereLinkShouldBeCreated" -Target "Target"
 
 # Create hard link for a folder (junction point)
- 
+
 > New-Item -ItemType Junction -Path "PathWhereLinkShouldBeCreated" -Target "Target"
 #+end_src
 *** Measure command execution time in powershell
 #+begin_src powershell
-Measure-Command { Invoke-Expression "cargo run" | Out-Default } 
+Measure-Command { Invoke-Expression "cargo run" | Out-Default }
 #+end_src
 *** Powershell add command line arguments
 #+begin_src powershell
@@ -285,7 +418,7 @@ Write-Output "$paths and $destination"
 :END:
 #+begin_src powershell
 if (-Not (Test-Path -Path $paths)) {
-   # Logic   
+   # Logic
 }
 #+end_src
 ** T-SQL
@@ -394,7 +527,10 @@ See [[info:elisp#Interactive Codes][info:elisp#Interactive]]
 :END:
 Any predicates in elisp return either ~nil~ or anything else.
 In fact, =false= value is just ~nil~. Anything else is interpreted as =true=.
-*** Elisp ~if~ keyword
+*** Elisp ~if~ keyword :ATTACH:
+:PROPERTIES:
+:ID:       4eae3b16-b29e-46f2-9a54-af8448d62550
+:END:
 The if keyword can be used as follows in elisp:
 For details on how =test= part decides where to go, see [[id:1d004eef-7276-403b-9ac8-d311d619f3e4][Predicates and boolean tests in elisp]]
 
@@ -409,8 +545,12 @@ For details on how =test= part decides where to go, see [[id:1d004eef-7276-403b-
 #+end_src
 
 #+RESULTS:
-: Point is at position 10472
-*** Elisp ~save-excursion~ function
+: Point is at position 13103
+
+*** Elisp ~save-excursion~ function :ATTACH:
+:PROPERTIES:
+:ID:       1ee370d2-d148-4622-b815-054c11cf0630
+:END:
 This is a useful function that will evaluate some expressions from it's budy,
 then after everything is evaluated, it will restore the original point
 position so the user doesn't notice anything. It is useful in functions that
