@@ -608,6 +608,28 @@ in main, a.done = true, b.done = true
 :ID:       2291a412-ed3a-4b26-a489-ab11deafee44
 :END:
 For basic documentation on typescript see the [[https://www.typescriptlang.org/docs/handbook/2/basic-types.html][Documentation]]
+*** Compilation
+Compilation of files can be done in any of the following ways:
+
+-   ~tsc~ to compile the nearby project (recognized via [[id:da390266-7df1-4692-80eb-e19a3df1c11e][tsconfig]].
+-   ~tsc somfile.ts~ compile a single file
+-   ~tsc --project othertsconfig.json~
+-   ~tsc index.js --declaration --emitDeclarationOnly~
+-   ~tsc src/*.ts~ compile all .ts files in ~src~ folder.
+-   ~tsc one.ts two.ts --target esnext --outFile index.js~ combine two files
+*** Config file
+:PROPERTIES:
+:ID:       da390266-7df1-4692-80eb-e19a3df1c11e
+:END:
+Typescript is configured with ~tsconfig.json~
+
+Same as ~package.json~ for typescript. Specifies options for Typescript compilation.
+
+**** Useful commands
+- ~target~ will specify to which features in your code will get downgraded. For example ~${temlate} string~ might be downgraded to string concatenation. Using ~es6~ is a strong choice, but all depends.
+- ~module~ - which module type is generated? (CommonJs, ES modules, etc...)
+- ~noImplicitAny~ - will throw an error in all places where type is ~any~ or is implicitly made ~any~.
+- ~strictNullChecks~ - helps to handle ~null~ and ~undefined~, especially in cases where a value was not initialized and still used
 *** Add typescript to webpack
 -  Install ~ts-loader~
 -  Add a rule to your ~webpack.config.js~
@@ -660,7 +682,6 @@ function doSomething(fn: CallableWithProps) {
 #+end_src
 
 #+RESULTS:
-
 ** Powershell
 *** Create ssh key in windows and add it to github
 :PROPERTIES:
