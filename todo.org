@@ -1,0 +1,4 @@
+* Inbox
+** TODO
+
+[[file:~/org/notes.org::*Haircut][Haircut]]
