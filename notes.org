@@ -236,13 +236,33 @@ When working on a feature, i will usually follow below steps:
 *** Cheat Sheets
 Good online cheat sheets - [[https://devhints.io/]]
 Command line cheat sheet - [[https://cheat.sh/]]
-*** Definition of an Enterprise application
+*** Enterprise application (from the book about patterns)
+**** Definition of an Enterprise application
 From the book =Patterns of enterprise applications architecture=
 Some might say that enterprise applications are just big systems, but there are plenty of large projects that are not enterprise applications.
 My understanding of enterprise applications is that. Those are systems integrated very closely with business processes (or driving business processes). Like for example payroll, logistic applications and warehouse management systems, financial applications etc. Those applications often operate with data and this data needs to persist somewhere. Enterprise applications are often built around some business rules, and Layered architecture is very helpful with this. By isolating business rules to a separate layer, it will be easier to change (and business rules are something that changes a lot)
+**** How to measure performance
+There are many measurements that can be done for enterprise apps:
+
+- Response time
+- Responsiveness
+- How Response or responsiveness change under load
+- Scalability
+- Performance (transactions per second)
 *** Design resources
 - https://css-tricks.com/
 - https://www.refactoringui.com/
+*** Writing notes
+**** Focus on understanding
+- think broader, try to find counterarguments to your ideas and understandings.
+- writing effective notes involves reading, thinking and writing down your understanding (in your own words, concise) of what you just read. If you understood something, you must likely also remembered it.
+**** How to take smart notes
+//From the book 'How to take smart notes' or something//
+- don't use complicated techniques and tools
+- Keep all your unfinished tasks and projects written down, in order to free your working memory. (let your brain do more thinking than memorization). Bullet journaling might help with that.
+- revisit your notes and try to link them in different ways in order to generate new ideas.
+- don't multitask, it's impossible. multitasking is just fast switching of tasks. it's better to focus on one task at a time to preserve energy
+- willpower is a finite resource that requires time to recover.
 ** Algorithms
 Here i will document my solutions to various leetcode questions. I will first attempt to solve them in Python or Javascript
 
@@ -604,6 +624,26 @@ To see a list of usernames see [[id:b787a88d-b5f3-41ad-84ab-79fb31bb981e][List a
 :END:
 To list all users in Linux, use ~cat /etc/passwd~
 To list all groups currently in Linux, use ~cat /etc/group~
+*** Extract files from archive
+~tar xvzf file.tar.gz~
+
+Where:
+1. ~x~ stands for ~extract~
+2. ~v~ stands for ~verbose~
+3. ~z~ stands for ~gzip~
+4. ~f~ stands for ~file~
+*** Grep exclude directory
+In order to exlude directories while ~grep'ing~:
+
+#+begin_src sh
+grep -r --exclude-dir="node_modules" "pattern"
+     |                   |
+`recursive`   `exclude node_modules`
+#+end_src
+*** How to open file manager from terminal
+1. Navigate to the folder you need
+2. type ~xdg-open .~ to open current folder or ~xdg-open filename~ to open file
+It's the same as ~start~ command in Windows
 ** Databases
 *** ACID
 ACID stands for atomicity, consistency, isolation, durability.
@@ -1002,6 +1042,40 @@ await list.fields.add("MyUser", "SP.FieldUser", { FieldTypeKind: 20 });
 *** Create sharepoint JSON formats from html and css
 To create JSON format for a Sharepoint list from html and css, use:
 https://pnp.github.io/List-Formatting/tools/html-formatter-generator/
+*** Remove buttons from command bar
+:PROPERTIES:
+:SOURCE:   https://docs.microsoft.com/en-us/sharepoint/dev/declarative-customization/view-commandbar-formatting
+:ID:       03016867-8d3a-4f5a-9b04-e3e1530134a8
+:END:
+There is a convenient JSON property for editing the buttons on a list's command bar.
+
+Below an example of view format.
+#+begin_src json
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/sp/v2/row-formatting.schema.json",
+  "commandBarProps": {
+    "commands": [
+      {
+        "key": "new",
+        "hide": true
+      },
+      {
+        "key": "automate",
+        "hide": true
+      },
+      {
+        "key": "integrate",
+        "hide": true
+      }
+    ]
+  }
+}
+#+end_src
+*** Hide list from users
+:PROPERTIES:
+:SOURCE:   https://youtu.be/kVb4E99sxMw
+:END:
+Another possibility is to [[id:03016867-8d3a-4f5a-9b04-e3e1530134a8][Remove buttons from command bar]]
 ** Rust
 :PROPERTIES:
 :ID:       fb389731-9b2f-4380-98af-21ad3e832e66
@@ -1018,7 +1092,81 @@ https://pnp.github.io/List-Formatting/tools/html-formatter-generator/
 Cargo is the [[id:fb389731-9b2f-4380-98af-21ad3e832e66][Rust's]] package manager.
 
 Documentation can be found at https://doc.rust-lang.org/cargo/
+*** Function return value
+:PROPERTIES:
+:ID:       0805088e-3c3c-44a0-b4ba-9ace2265c8ce
+:END:
+In Rust functions, there are few ways to specify a return value
 
+**** Implicit
+If last thing appearing in a function body is an expression (note there is no semicolon after it, see [[id:f7eca509-01e4-4dd7-a148-87d507717c96][Statement vs expression]]) then it will be returned from this function. This is also called the tail of the function.
+
+#+begin_src rust
+fn sum(a: i32,  b: i32) -> i32 {
+    a + b
+}
+#+end_src
+**** Explicit
+Explicitly returning a value from a function is done using `return` keyword
+
+#+begin_src rust
+fn sum(a: i32,  b: i32) -> i32 {
+    return a + b;
+}
+#+end_src
+
+Functions that do not return anything, implicitly return [[id:518a6495-1676-408d-8c4b-3981796bf22e][Unit type]].
+*** Unit type
+:PROPERTIES:
+:ID:       518a6495-1676-408d-8c4b-3981796bf22e
+:END:
+Unit ~()~ type is a special type in Rust.
+
+It has only one value – ~()~.
+
+Most of the time, this value is used implicitly. Functions that do not have a ~->~ (return type) specified, return the unit type.
+
+An [[id:f7eca509-01e4-4dd7-a148-87d507717c96][expression]] can be forced to return ~()~ by placing a semicolon ~;~ after it. (see [[id:0805088e-3c3c-44a0-b4ba-9ace2265c8ce][Function return value]])
+
+Example:
+#+begin_src rust
+// This returns unit type ()
+fn unit() -> () {
+    4;
+}
+
+// this returns an i32
+fn intret() -> i32 {
+    4
+}
+#+end_src
+*** Statement vs expression
+:PROPERTIES:
+:ID:       f7eca509-01e4-4dd7-a148-87d507717c96
+:END:
+Rust is an expression based language.
+
+**** Differences:
+- Statement do not have a return value (ex ~let a = 5;~ is a statement)
+- Expressions have a return type (ex ~6 + 5~ is a expression, a function call is an expression)
+- Expressions can be part of a statement (~let a = 6 + 5~, here ~6 + 5~ is an expression which is part of a statement)
+
+Good way to think about it. Statements are complete, so they should have some finishing symbol at the end (in our case the semicolon ~;~)
+*** Ownership rules
+:PROPERTIES:
+:ID:       501baa50-6e78-4c9e-9c9c-a4e70467dd81
+:END:
+- Each value in Rust has a variable that’s called its owner.
+- There can only be one owner at a time.
+- When the owner goes out of scope, the value will be dropped.
+*** How memory is dropped
+Memory is dropped automatically when the scope where memory is [[id:501baa50-6e78-4c9e-9c9c-a4e70467dd81][owned]] is over.
+To drop memory, function ~drop~ is called
+*** How to lint rust code
+1.  Use ~cargo check~
+2.  Use ~cargo clippy~
+
+For help use ~cargo help check~ or ~cargo help clippy~
 ** CSS
 *** Collapsible element
 To make a collapsible element with Css, just transition the ~max-height~ property
