@@ -240,6 +240,9 @@ Command line cheat sheet - [[https://cheat.sh/]]
 From the book =Patterns of enterprise applications architecture=
 Some might say that enterprise applications are just big systems, but there are plenty of large projects that are not enterprise applications.
 My understanding of enterprise applications is that. Those are systems integrated very closely with business processes (or driving business processes). Like for example payroll, logistic applications and warehouse management systems, financial applications etc. Those applications often operate with data and this data needs to persist somewhere. Enterprise applications are often built around some business rules, and Layered architecture is very helpful with this. By isolating business rules to a separate layer, it will be easier to change (and business rules are something that changes a lot)
+*** Design resources
+- https://css-tricks.com/
+- https://www.refactoringui.com/
 ** Algorithms
 Here i will document my solutions to various leetcode questions. I will first attempt to solve them in Python or Javascript
 
@@ -331,7 +334,7 @@ There are 2 possible solutions that appear to me as optimal:
 1. Sort the array first. It is easy to find out if there are duplicates in a sorted array. The complexity will be then equal to the complexity of sorting. This is a more memory efficient method.
 2. Use a hash map to identify if an element was previously found
 ** Design Patterns
-*** Decorator pattern
+*** Decorator
 [[https://refactoring.guru/design-patterns/decorator][Source - refactoring guru]]
 Decorator design pattern is used to enhance an object using `Composition` instead of inheritance, while preserving the same interface
 
@@ -343,6 +346,44 @@ Let's say I have a ~DataSource~ class in my library. Users of the library have r
 :ID:       d0264d8b-852b-40be-8c48-c708a4bc075b
 :END:
 [[attachment:pseudo.png]]
+*** Singleton
+:PROPERTIES:
+:ID:       92e4226f-e8ac-4104-a74f-eb953e224abb
+:END:
+This is a very simple pattern. It ensures that there will be only one instance of a class at the same time in the application. This if often needed when objects with state need to be passed around the application.
+
+In [[id:6c94391a-b52c-4308-93bc-d770b29857fc][Javascript]], a singleton is very easily implemented, just by exporting a concrete instance of an object:
+
+#+begin_src js
+class Database {
+    constructor(source) {
+        this.source = source;
+    }
+
+    getSource() {
+        return this.source;
+    }
+}
+
+export default new Database("data.sqlite");
+#+end_src
+
+**** Solved problem
+Singleton is a videly used pattern. And it solves well the problem of passing a stateful object around in application. It could be used in applications where there are not so many dependencies, or we know those dependencies will not change (we never know though).
+**** Caveats
+You should never (at least in javascript), assume that the singleton instance is really the only one instance used in the application. Unless using a `global.MyInstance` variable, there is always a possibility that two packages will use different versions of some singleton dependency, and will download two versions in their `node_modules`. But you probably never need a really unique singleton in the whole application.
+*** Dependency injection :ATTACH:
+:PROPERTIES:
+:ID:       1706fad8-b073-4c65-9918-f63b641013d8
+:END:
+Also called just DI. It's a pattern, same as [[id:92e4226f-e8ac-4104-a74f-eb953e224abb][Singleton]] pattern that facilitates passing dependencies. Unlike singleton, where the dependency is created outside of your program main logic, in DI, there is such a thing called injector, which constructs the dependencies, and provides them to the parts of the application that require them.
+
+[[file:~/Pictures/Screenshots/Screenshot from 2022-07-24 15-42-58.png]]
+
+**** Solved problem
+The DI solves the same problems as [[id:92e4226f-e8ac-4104-a74f-eb953e224abb][Singleton]], plus having less coupling between parts of the application. In fact, dependencies are quite interchangeable until they all implement the same interface.
+**** Caveats
+Injecting dependency manually can be cumbersome, and in large applications there might be a need to insert a lot of services. To help with those, check out Inversion of control and Dependency injection container.
 ** Chrome extension development
 *** Getting started
 1. Open link in chrome `chrome://extensions`
@@ -527,6 +568,15 @@ if (-Not (Test-Path -Path $paths)) {
    # Logic
 }
 #+end_src
+*** Dotnet test - run failed tests only with powershell
+Use following powershell script to extract the filter for our command (replace the name of =.trx= file):
+
+#+begin_src sh
+$filter = (Select-String -Pattern 'UnitTestResult.*testName=\"(\w+)\".*outcome="Failed"' -Path .\TestResults\All.trx | ForEach-Object { "DisplayName=$($_.Matches.Groups[1])" }) -join "|"
+
+# Then run dotnet command
+dotnet test --filter $filter --logger "trx;logfilename=All3105.trx" -r .\TestResults\
+#+end_src
 ** Linux
 *** Create symlink
 Links are created using the ~ln~ command.
@@ -536,6 +586,24 @@ ln -sf ~/dotfiles/nvim ~/.config/nvim
 #+end_src
 
 For windows, see [[id:3c5794b4-a7ea-4011-af27-895d646f16e3][Create link in powershell]]
+*** Edit cron tasks for other user
+In order to edit cron tasks in Linux:
+#+begin_src sh
+crontab -e
+#+end_src
+
+To edit tasks as other user:
+#+begin_src sh
+crontab -e -u username
+#+end_src
+
+To see a list of usernames see [[id:b787a88d-b5f3-41ad-84ab-79fb31bb981e][List all users in Linux]]
+*** List all users in Linux
+:PROPERTIES:
+:ID:       b787a88d-b5f3-41ad-84ab-79fb31bb981e
+:END:
+To list all users in Linux, use ~cat /etc/passwd~
+To list all groups currently in Linux, use ~cat /etc/group~
 ** Databases
 *** ACID
 ACID stands for atomicity, consistency, isolation, durability.
@@ -616,6 +684,10 @@ DROP TABLE table_name;
 :PROPERTIES:
 :ID:       a05ed9e6-09fe-49fd-aa4f-8e1db8d1976c
 :END:
+**** Documentation resources
+Some documentation resources and courses on T-SQL (and SQL in general):
+1. Official Microsoft documentation - https://docs.microsoft.com/sql
+2. Microsoft reference on T-SQL specifically - https://docs.microsoft.com/en-us/sql/t-sql
 **** Category of statements in T-SQL
 There are 3 base categories of statements in T-SQL:
 
@@ -636,7 +708,7 @@ Rules of ternary logic:
 
 Any comparison of 2 =UNKNOWNs= is also =UNKNWON=
 Comparison of any =KNOWN= value to =UNKNOWN= value is also =UNKNOWN=
-A State predicate (a str    ict Yes or No question), always evaluates to =TRUE= or =FALSE=
+A State predicate (a strict Yes or No question), always evaluates to =TRUE= or =FALSE=
 **** Aggregate functions
 Aggregate functions are the ones that take multiple values, and return a single value. Examples of aggregate functions:
 

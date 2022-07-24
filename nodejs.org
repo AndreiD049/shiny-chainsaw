@@ -95,6 +95,129 @@ type Example = {
 #+end_src
 
 You can also combine it with [[id:b27f6b66-2d4c-4746-8b5b-1829d6b70b31][Call signature]]
+*** Function narrowing
+:PROPERTIES:
+:ID:       8aead2c5-0974-4e44-9013-58e61b9e1a01
+:END:
+**** Type guards
+Narrowing happens in Typescript when we have multiple possible types, and we narrow the possibilities by checking for concrete types:
+#+begin_src js
+function narrow(a: string | number) {
+    if (typeof a === "string") {
+        // here typescript knows that a is a string
+        return a.toLowerCase();
+    }
+    // here, a is number for sure.
+    return a + 2;
+}
+#+end_src
+
+The ~if (typeof ...)~ check is also called a ~type guard~.
+Besides ~typeof~ there is also ~insanceof~ narrowing, used for objects constructed with new.
+
+**** Equality narrowing
+
+You can also narrow types by comparing them:
+
+#+begin_src js
+function test(a: string | number, b: string | boolean) {
+    if (a === b) {
+        // here, because a is equal to b,
+        // we know that their types are the same
+        // and their only common type is string
+        // so both a and b are strings
+        return a.toLowerCase() + b.toLowerCase();
+    }
+    // ...
+}
+#+end_src
+You can use any kind of equality checks ~===~, ~!==~, ~==~, ~!=~ etc.
+
+**** `in` narrowing
+
+Javascript ~in~ keyword can be used to narrow types:
+
+#+begin_src js
+type Bird = { fly: () => void };
+type Fish = { swim: () => void };
+
+function doSomething(animal: Bird | Fish) {
+    if ("fly" in animal) {
+        // Here we have a Bird for sure
+        animal.fly();
+    } else {
+        animal.swim();
+    }
+}
+#+end_src
+
+**** Type predicates
+Type predicates in Typescript are functions that help with type Typescript function narrowing. It has some special syntax.
+
+#+begin_src js
+function isBird(animal: Fish | Bird): animal is Bird {
+    return (animal as Bird).fly !== undefined;
+}
+#+end_src
+
+This special syntax ~animal is Bird~ helps type narrowing:
+
+#+begin_src js
+function test(animal: Bird | Fish) {
+    if (isBird(animal)) {
+        // here animal is definetly Bird
+    }
+}
+#+end_src
+
+**** Discriminating unions
+:PROPERTIES:
+:ID:       cdb817ba-6251-436b-a7d1-c09eaf7fcdae
+:END:
+If a Union types in typescript contains types which all have a common property of some literal type, this property can be used for narrowing.
+
+#+begin_src js
+    type Circle = {
+        kind: "circle"; // literal Type
+        radius: number;
+    };
+
+    type Square = {
+        kind: "square"; // literal Type
+        side: number;
+    };
+
+    type Shape = Circle | Square;
+
+    function testShape(shape: Shape) {
+        if (shape.kind === "circle") {
+            // here shape is a Circle
+        } else {
+            // and here it's a Square
+        }
+    }
+#+end_src
+**** =Never= type
+When narrowing, if all types were already excluded, value is assigned the ~never~ type. Also, functions that throw an exception have the ~never~ type
+*** Union types
+Union types is a way to specify that a value can be any one of union members types. Example ~string | number~ type implies that value is either ~string~ or ~number~.
+
+When we have a union type, it means we can use only properties that are common to \*\*every\*\* type in that union. For example, having variable ~thing~ of type ~string | number~, we cannot just write ~thing.toUpperCase()~ because type ~number~ doesn't have this method.
+
+In order to work around this, we need to convince Typescript that it's actually the correct type (this is called [[id:8aead2c5-0974-4e44-9013-58e61b9e1a01][Function narrowing]]:
+
+#+begin_src js
+// thing is of type `string | number`
+if (typeof thing === 'string') {
+ // here we are sure think is a string
+ console.log(thing.toUpperCase());
+} else {
+ // thing is a number
+ console.log(thing.toFixed(1));
+}
+// ...
+#+end_src
+Also, you can use functions like ~Array.isArray~
 ** Add eslint to project
 - Install eslint – ~npm i -D eslint~
 - Run – ~npx eslint --init~
@@ -225,7 +348,10 @@ See:
 - [[https://webpack.js.org/guides/author-libraries/]]
 - [[https://webpack.js.org/configuration/output/#outputglobalobject]]
 
-** Common js modules
+** Common js modules :modules:
+:PROPERTIES:
+:ID:       e1aa913b-d8b0-44df-b244-c1e4e6c201af
+:END:
 Common js modules are the modules using require function. This is the native mechanism used in [[id:6c94391a-b52c-4308-93bc-d770b29857fc][Node js]]. (at least it was before Es modules appeared). Each file is considered a module. Objects like require, module and others are available thanks to Module wrapping.
 *** Module wrapping
 Before a commonjs module is executed, it's contents are wrapped in a function. It looks approximatively like this:
@@ -262,7 +388,7 @@ In order for Node js to be able to recognize a folder as a module, it should mee
 #+end_src
 
 - In case no ~package.json~ is found, Node.js will look for ~index.js~ or ~index.node~ files.
-** Common js cycle
+*** Common js cycle
 Sometimes common js modules depend on one another. In this case, an object might receive a dependency that was not loaded completely. For example:
 
 ~a.js~:
@@ -304,6 +430,13 @@ in a, b.done=true
 a done
 in main, a.done = true, b.done = true
 #+end_src
+*** Explicit Rules
+Node will determine a package as commonjs by default.
+
+To specify it explicitly:
+- use ~.cjs~ file extension
+- specify ~"type": "commonjs~ in package.json
+- provide a command line argument when running node ~--input-type=commonjs~
 ** Conditional import
 :PROPERTIES:
 :ID:       76f572b9-74d7-469e-a37b-320c03dbd319
@@ -390,3 +523,51 @@ Data attributes are special type of html attributes:
 #+end_src
 
 From js, this attribute can be accessed by using ~.getAttribute()~ specifying the full name ~data-open~. But there is a more convenient way: using the ~dataset~ property. You could access it like this ~el.dataset.open~.
+** ES modules :modules:
+ECMAScript is the official standard format to package [[id:6c94391a-b52c-4308-93bc-d770b29857fc][Node js and Javascript]] code for reuse.
+
+- To understand how to start working with es modules in Node js, see [[id:da344721-889a-4137-b8f4-1e8f9e17b913][Enabling ES modules]]
+- To see what kind of strings you can provide to ~import * from ...~ [[id:e0d4bd08-3ac8-45f8-80cf-8c97fd2fbdea][Import specifiers]]
+- You can import Common js modules from Es modules but not vice versa. (see [[id:c88a22ce-56a6-4060-86e9-b1f3cb6a74f7][How to import cjs (commonjs) from ejs (ecmascript) modules]])
+- For differences between Es modules and Common js modules, see Es modules vs commonjs modules
+- Resolver algorithm is quite confusing, but can be found [[ https://nodejs.org/docs/latest-v15.x/api/esm.html#esm_resolver_algorithm][here]]
+
+*** Mandatory file extensions
+To match the way files are referenced in the browser, file extensions must be used
+
+*** ~import.meta~ properties
+There is a ~import.meta.url~ property which provides a link to the current module file.
+*** Enabling ES modules
+:PROPERTIES:
+:ID:       da344721-889a-4137-b8f4-1e8f9e17b913
+:END:
+Default module in Node js at the moment of writing is [[id:e1aa913b-d8b0-44df-b244-c1e4e6c201af][Common js modules. To enable features of Es modules:
+
+-   change the file extension to ~.mjs~
+-   add to your [package.json](https://andreid049.github.io/no-brainer//#Package%20json) following line: ~"type": "module"~
+-   use node command line argument ~--input-type=module~
+*** ES modules vs CommonJS modules
+[[Source][https://nodejs.org/docs/latest-v15.x/api/esm.html#esm_differences_between_es_modules_and_commonjs]]
+
+Differences:
+- No ~require~, ~module~ or ~module.exports~ variables
+- No ~__filename~ or ~__dirname~
+- No Json modules loading
+- No native module loading
+- No ~NODE_PATH~
+- No ~require.extensions~
+- No ~require.cache~. Es modules use their own cache
+*** How to import cjs (commonjs) from ejs (ecmascript) modules
+:PROPERTIES:
+:ID:       c88a22ce-56a6-4060-86e9-b1f3cb6a74f7
+:END:
+You can import Common js modules to Es modules and vice versa using [[id:dd393aee-ef6c-4800-9d92-0d332f8cc4ff][Dynamic import]].
+But be carefull, there are performance considerations to this.
+** Rollup
+*** Example Rollup config
+**** Installation
+#+begin_src sh
+npm i -D rollup rollup-plugin-typescript2 rollup-plugin-visualizer rollup-plugin-size-snapshot rollup-plugin-terser @rollup/plugin-node-resolve rollup-plugin-peer-deps-external
+#+end_src
+**** Example config file :ATTACH:
+Copy [[attachment:rollup.config.js][config]] file to project
