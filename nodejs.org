@@ -276,6 +276,14 @@ type direction = "up" | "down" | "left" | "right";
 #+end_src
 
 You can have ~number~ literal types too (~1 | 2 | 3 | 4~).
+*** Null assertion operator
+Typescript ~null-assertion operator~ (also called the ~postfix ! operator~) helps assuring Typescript that value is not null. This does absolutely nothing at runtime, so you have to be sure value is really not null.
+
+#+begin_src typescript
+function get(obj: { value: number } | null) {
+    return obj!.value; // because of '!', typescript believes me it's not null
+}
+#+end_src
 ** Add eslint to project
 - Install eslint – ~npm i -D eslint~
 - Run – ~npx eslint --init~
@@ -702,3 +710,112 @@ Example:
 #+begin_src sh
 lerna run build --scope '{sp-preset,*notificat*,*proper*}'
 #+end_src
+** Next js :next:
+Next js is a library for creating Backend and frontend for:
+- ~Statically generated sites~ (generated at build time). See [Next js static generation](https://andreid049.github.io/no-brainer//#Next%20js%20static%20generation)
+- ~Server-side rendered sites~ (generated at each request on the server) [Next js server side rendering](https://andreid049.github.io/no-brainer//#Next%20js%20server%20side%20rendering)
+- ~Client-side generated data~ is fetched on the server and DOM is created on the client
+- Next js can be setup by editing ~next.config.js~, for example new rules can be added to Webpack config. See Next js webpack config
+
+*** How to read local files
+To read local files - use ~process.cwd()~. Because ~__dirname~ doesn't work.
+*** Routing
+It's possible to access the ~router~ object in your react component (via ~useRouter~ hook from ~next/router~). You can use it mostly like react-router, ex: ~router.push('/some-path')~.
+
+There are 3 types of routes:
+
+1.  Predefined routes. When the file is created on the server and is not generated dynamically.
+2.  Dynamic routes. Routes using dynamic parameters, for example ~/pages/posts/[id].js~ will match ~/posts/124~, and ~/posts/234~ etc.. (see [[id:b0fc8c8d-ef31-4185-8fd1-a30cb58c9288][Static site generation]] for more info)
+3.  Catch all routes. They are created as ~[...slug].js~ with 3 dots. For example ~/pages/posts/[...slug].js~ will match any route like ~/posts/a~, and ~/posts/a/b~ and so on. A catch-all route can also be made \_optional\_ using double square brackets. Example: ~/posts/pages/[[...slug]].js~. This means that it can also catch the ~/posts/pages~ route (without any parameters)
+
+The parameters passed to dynamic or catch-all routes can be accessed in ~router.query~. For catch-all, the parameter will always be an ~array~.
+
+Note: Predefined routes take precedence over dynamic routes, and dynamic routes over catch all routes.
+*** Static site generation
+:PROPERTIES:
+:ID:       b0fc8c8d-ef31-4185-8fd1-a30cb58c9288
+:END:
+Command used to start the generation `next build && next export`.
+
+**** Generation with data
+When you need to call some API, or to get some other data before rendering the page, you can have 2 situations:
+
+1. Your page's **content** depends on some parameters
+2. Your page's **path** (and most often **content**) depends on some parameters
+
+For first situation: create ~export async function getStaticProps()~, which returns following object:
+
+#+begin_src typescript
+interface StaticProps {
+    props: {
+        // here are the props that your component needs
+        // for example:
+        // posts: ...
+        // id: ...
+    }
+}
+#+end_src
+
+This function can go to a database, call some api, or read some local files to determine the props. For extra things that can be returned see [[https://nextjs.org/docs/basic-features/data-fetching#getstaticprops-static-generation][documentation]]
+
+For cases when you need also a different path to be fetched, use ~export async function getStaticPaths()~, which returns following:
+
+#+begin_src typescript
+interface StaticPaths {
+    paths: {
+        params: {
+            // here are the path properties
+            // for example:
+            // id: someid
+        }
+    }
+}
+#+end_src
+
+In this case, your ~getStaticProps~ will get an argument, for each ~path~ (ex ~{ params: { id: 1 } }~) returned by ~getStaticPaths~:
+
+#+begin_src typescript
+function getStaticProps(path) { //...
+#+end_src
+
+Same as for ~getStaticProps~, ~getStaticPaths~ will probably consult some external data storage.
+
+**** Exceptions
+~next/image~ package cannot be used with static generation
+
+**** Reading local files
+TLDR: use ~process.cwd()~
+
+**** References
+1. https://nextjs.org/docs/basic-features/pages#static-generation-with-data
+*** Webpack config
+In order to add new rules to [[id:30de9951-46cc-45cc-8d74-98d53664569b][Webpack]] config, add this to ~next.config.js~:
+
+#+begin_src js
+module.exports = {
+  reactStrictMode: true,
+  webpack: (config) => {
+    config.module.rules.push({ // here we are adding a new rule to webpack
+      test: /\.svg$/,
+      use: ["@svgr/webpack"]
+    });
+    return config;
+  }
+};
+#+end_src
+** Nodejs assert
+Node.js standard module to handle assertions.
+
+-   ~assert.deepStrictEqual~: check for equality
+-   ~assert.strictEqual~: same but not deep
+-   ~assert.ok~: check if value is truthy
+-   ~assert.throws~: checks if function will throw
+** package.json
+Important fields in ~package.json~:
+
+- **name**: used for named imports as the name of the package
+- **type**: can be "module" or "commonjs". Specifies how Node js modules are treated when imported. The "type" fields specifies not only how the entry point file is treated, but also all files that are imported in it. If omitted, default type is commonjs.
+- **main**: Specifies the entry point of the package.
+- **exports**: Same as "main", but with extra features. "main" is supported in older version of node, while "exports" is a newer feature. It can be a path or a list of paths that are exported by the package. Other files will not be exported. Conditional exports based on environment and how package is imported are possible, see Conditional module export.
+- **imports**: additionally to exports, it is possible to define internal import aliases, and interchange them conditionally.
+- **types**: if you're using [[id:2291a412-ed3a-4b26-a489-ab11deafee44][Typescript]], then you will want to specify this field and point it to a ~.d.ts~ file. This way, users importing your package from typescript can benefit from type definitions.

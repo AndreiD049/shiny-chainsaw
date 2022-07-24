@@ -279,6 +279,115 @@ local fn = vim.fn    -- to call Vim functions e.g. fn.bufnr()
 local g = vim.g      -- a table to access global variables
 local opt = vim.opt  -- to set options
 #+end_src
+**** Luasnippets
+For more extensive documentation always use internal vim help ~:h luasnip.txt~
+***** Setting up
+
+For default config values, see [[https://github.com/L3MON4D3/LuaSnip/blob/69cb81cf7490666890545fef905d31a414edc15b/lua/luasnip/config.lua#L82-L104][this]]
+
+#+begin_src lua
+local ls = require'luasnip'
+
+ls.config.set_config {
+    history = true,
+
+    -- this is handy to see all values update at one if used in many places
+    updateevents = "TextChanged,TextChangedI",
+
+    -- Those are the globals that will be present in each file
+    -- so you don't need to re-define then each time
+    snip_env = {
+        ls = require'luasnip',
+        parse = ls.parser.parse_snippet,
+        fmt = require('luasnip.extras.fmt').fmt,
+        rep = require('luasnip.extras').rep,
+        s = ls.snippet,
+        t = ls.text_node,
+        i = ls.insert_node,
+        f = ls.function_node,
+        c = ls.choice_node,
+    }
+}
+
+-- cleanup the snippets before reloading, this is actually needed for the contents to change
+ls.cleanup()
+#+end_src
+
+***** Loading files
+In order to load snippets from folder, add following
+
+#+begin_src lua
+-- to load snippets from lua files
+require('luasnip.loaders.from_lua').lazy_load({ paths = "./luasnippets" })
+-- to load vscode like snippets
+require('luasnip.loaders.from_vscode').lazy_load({ paths = "./snippets" })
+#+end_src
+
+***** Lua snippets
+
+Snippets stored in lua files can be more powerful, although less portable. To start with them, create a directory (ex: ~luasnippets~) where all snippets will be stored
+
+Snippets are stored based on ~filetype~. For example, for snippets available for all files, create a file ~luasnippets/all.lua~. (See ~:set filetype~) This file needs to return a list of 2 values, snippets and autosnippets (which may be null)
+
+Example (notice we didn't declare any local variables, because we used snip\_env setup above):
+#+begin_src lua
+local snippets = {
+    s('state', fmt("const [{}, set{}] = React.useState({});{}", {
+        i(1, "state"),
+        f(function (args)
+            return (args[1][1]:gsub("^%l", string.upper))
+        end, {1}),
+        i(2, "value"),
+        i(0)
+    }))
+}
+
+local autosnippets = {}
+
+return snippets, autosnippets
+#+end_src
+
+***** Keymaps
+In order to navigate better, you can set following keymaps:
+
+#+begin_src lua
+local ls = require('luasnip')
+-- Luasnip jump forward or expand
+vim.keymap.set({'i', 's'}, "<C-k>", function()
+    if (ls.expand_or_jumpable()) then
+        ls.expand_or_jump()
+    end
+end, {silent = true})
+
+-- Luasnip jump backward
+vim.keymap.set({'i', 's'}, "<C-j>", function()
+    if (ls.jumpable(-1)) then
+        ls.jump(-1)
+    end
+end, {silent = true})
+
+vim.keymap.set({'i', 's'}, "<C-l>", function()
+    if (ls.choice_active()) then
+        ls.change_choice(1)
+    end
+end, {silent = true})
+
+-- reload snippets after change was done
+vim.keymap.set("n", "<leader><leader>s", "<cmd>source " .. vim.fn.stdpath('config') .. "/lua/snippets-setup.lua<cr>", { silent = true })
+
+-- Edit snippets for current filetype
+vim.keymap.set("n", "<leader><leader>se", function() require("luasnip.loaders").edit_snippet_files() end, { silent = true })
+#+end_src
+***** Extending filetypes
+#+begin_src lua
+-- when in typescript file, search ONLY typescript and typescriptreact snippets
+ls.filetype_set("typescript", { "typescript", "typescriptreact" })
+
+-- when in typescript files, ALSO search typescriptreact
+-- WARNING: if this code is rerun every time setup is reloaded, you will see
+-- duplicate snippets
+ls.filetype_extend("typescript", { "typescriptreact" })
+#+end_src
 *** Making plans for the future
 When you plan something for the future, you cannot know if it will make you happy. (you cannot psychologically know it)
 
@@ -456,7 +565,74 @@ class Solution:
                     max_ending_here = max(0, max_ending_here)
             return max_so_far
 #+end_src
+*** Minimum in rotated sorted array
+:PROPERTIES:
+:SOURCE:   https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/
+:END:
+#+begin_example
+Suppose an array of length n sorted in ascending order is rotated between 1 and n times. For example, the array nums = [0,1,2,4,5,6,7] might become:
 
+[4,5,6,7,0,1,2] if it was rotated 4 times.
+[0,1,2,4,5,6,7] if it was rotated 7 times.
+Notice that rotating an array [a[0], a[1], a[2], ..., a[n-1]] 1 time results in the array [a[n-1], a[0], a[1], a[2], ..., a[n-2]].
+
+Given the sorted rotated array nums of unique elements, return the minimum element of this array.
+
+You must write an algorithm that runs in O(log n) time.
+#+end_example
+
+**** Solution :ATTACH:
+:PROPERTIES:
+:ID:       4cda5a7b-337d-48ad-8998-ba47618ff86f
+:END:
+What is the goal? to find the minimum value in a sorted array that might be rotated. (in log n time)
+
+When a sorted array is rotated, what we have as a result is actually 2 sorted arrays. And what we need to find is the leftmost value of the smaller (right) one.
+
+[[attachment:sort1.png]]
+
+But we don't know where left array ends and the right one begins. What we can do, we can start choosing pivots and checking if we are in the first or second array?
+
+[[attachment:sort2.png]]
+
+With this pivot, are we in the first array or the second? we can check this by comparing to the left most value, if it's less or equal to the pivot, then we are in the left (first) array. In this case this is true, and this means we can safely ignore all the elements before the p1ivot and continue searching in the remaining array(s)
+
+[[attachment:sort3.png]]
+
+Notice we still have 2 sorted arrays left
+Say we selected a new pivot:
+
+[[attachment:sort4.png]]
+
+Now the situation is different as it's smaller than the leftmost value, meaning we are in the right array. This means all the values after it are only larger and can be ignored.
+Now after few iterations we would arrive at this point:
+
+[[attachment:sort5.png]]
+
+If the left value is smaller or equal to the right value, it means the array is already sorted, and what we need to do is just return the leftmost value.
+
+#+begin_src python
+class Solution:
+    def findMin(self, nums: List[int]) -> int:
+        left = 0
+        right = len(nums) - 1
+        while left < right:
+            if nums[left] <= nums[right]:
+                # Array from left to right is already sorted, return the leftmost value
+                return nums[left]
+            pivot = (left + right) // 2
+            # Where is the pivot? left or right array?
+            if nums[pivot] >= nums[left]:
+                # Left, continue searching to the right of the pivot
+                left = pivot + 1
+            else:
+                # Right, continue searching to the left
+                right = pivot
+        return nums[left]
+#+end_src
+
+**** Thoughts
+When we have to search something in a sorted or rotated array, first should come to mind Binary search. When thinking of binary search, it's useful to think about which parts of the sequence will be disqualified in this step, in order to make the possible solution list smaller.
 ** Design Patterns
 *** Decorator
 [[https://refactoring.guru/design-patterns/decorator][Source - refactoring guru]]
@@ -508,6 +684,74 @@ Also called just DI. It's a pattern, same as [[id:92e4226f-e8ac-4104-a74f-eb953e
 The DI solves the same problems as [[id:92e4226f-e8ac-4104-a74f-eb953e224abb][Singleton]], plus having less coupling between parts of the application. In fact, dependencies are quite interchangeable until they all implement the same interface.
 **** Caveats
 Injecting dependency manually can be cumbersome, and in large applications there might be a need to insert a lot of services. To help with those, check out Inversion of control and Dependency injection container.
+*** Pattern is just a pointer, not a solution
+Accoring to the book "Pattern of enterprise application architecture", patterns are 'half-baked'.
+
+Patterns cannot be applied blindly to your particular cases, as they always need to be adapted to a concrete situation. This is because the pattern is describing only **the core** solution (or how one should think about the solution). Implementing this solution is a task that should be done.
+
+#+begin_quote
+Every pattern is incomplete, and you have the responsibility, and the fun, to adapt it to your project
+
+//"Patterns of enterprise applications architecture"//
+#+end_quote
+** Data structures
+*** Piece table
+Piece table is a data structure convenient for implementing text editors or similar structures.
+
+Piece table is an append only data structure, meaning it doesn't delete anything from content that was ever inserted.
+
+It consists of 3 pieces:
+- original buffer (readonly)
+- add buffer (where we append what user has inserted)
+- array of pieces, that keeps track of which pieces from which buffers are currently shown
+
+#+begin_src json
+{
+    "original": "the quick brown fox\njumped over the lazy dog",
+    "add": "",
+    "pieces": [Piece(start=0, length=44, source="original")],
+}
+#+end_src
+
+For example we have the text ~Hello world~. Our piece table would look like this:
+#+begin_src json
+{
+    "original": "Hello world",
+    "add": "",
+    "pieces": [Piece(start=0, length=11, source="original")],
+}
+#+end_src
+
+Say we modify the string by adding a ~!~ at the end, so now it's ~Hello world!~
+#+begin_src json
+{
+    "original": "Hello world",
+    "add": "!",
+    "pieces": [
+        Piece(start=0, length=11, source="original"),
+        Piece(start=0, length=1, source="add"),
+    ],
+}
+#+end_src
+
+Notice what we did: we appended ~!~ to the add buffer, and added another piece to the array, that points to this character.
+
+What if we add something to the middle of the text? Say we modified the original string like this ~Hello f***ing world~ where we added the string ~f***ing~ (notice the space at the beginning)
+
+#+begin_src json
+{
+    "original": "Hello world",
+    "add": " f***ing",
+    "pieces": [
+        Piece(start=0, length=5, source="original"),
+        Piece(start=5, length=8, source="add"),
+        Piece(start=5, length=6, source="original")
+    ],
+}
+#+end_src
+
+Notice that now we split the original piece into 2 parts and add the new content in the middle.
+Same thing happens with deletion, we only need to adjust the pieces to point to the content that should be visible.
 ** Chrome extension development
 *** Getting started
 1. Open link in chrome `chrome://extensions`
@@ -1030,6 +1274,15 @@ For comments in T-SQL, use:
 -   ~BETWEEN~ - ~X BETWEEN A AND B~
 -   ~LIKE~ - ~X LIKE <pattern>~
 -   ~IS [NOT] NULL~ - ~X IS [NOT] NULL~ <– State predicate (always evaluates to TRUE or FALSE)
+**** Order of execution
+SQL server executes the queries in following order:
+
+1.  FROM
+2.  WHERE
+3.  GROUP BY
+4.  HAVING
+5.  SELECT
+6.  ORDER BY
 ** Elisp (emacs-lisp)
 *** Hello world
 #+begin_src elisp
@@ -1305,6 +1558,28 @@ Below an example of view format.
 :SOURCE:   https://youtu.be/kVb4E99sxMw
 :END:
 Another possibility is to [[id:03016867-8d3a-4f5a-9b04-e3e1530134a8][Remove buttons from command bar]]
+*** Package sharepoint solution
+Project metadata is stored in ~package-solution.json~
+
+To package the project use commands:
+1. ~gulp clean~
+2. ~gulp build~
+3. ~gulp bundle --ship~
+4. ~gulp package-solution --ship~
+
+~--ship~ flag is needed because by default all your js/css/media files will not be packaged and will be served from localhost.
+*** Pnpjs version 3 install typescript compiler
+In order for pnp/js v3 to work, you need a new version of typescript-rush-compiler:
+
+Steps:
+1. ~npm uninstall @microsoft/rush-stack-compiler-3.?~ \- replace ~?~ with your version
+2. ~npm i @microsoft/rush-stack-compiler-4.2~
+3. Update tsconfig.json to extend the 4.2 config: ~"extends": "./node_modules/@microsoft/rush-stack-compiler-4.2/includes/tsconfig-web.json"~
+4. Add this line in your ~gulpfile.js~
+
+#+begin_src typescript
+build.tslintCmd.enabled = false;
+#+end_src
 ** Rust
 :PROPERTIES:
 :ID:       fb389731-9b2f-4380-98af-21ad3e832e66
@@ -1408,7 +1683,48 @@ fn main() {
     }
 }
 #+end_src
+*** Memory allocation
+**** When memory is allocated?
+In Rust, memory is allocated from the moment a variable is created.
+
+**** When memory is deallocated?
+Memory is deallocated when the variable that owns the memory (see [[id:501baa50-6e78-4c9e-9c9c-a4e70467dd81][Ownership rules]]) goes out of scope
+
+**** Example:
+#+begin_src rust
+fn main() {
+    {
+        let s = String::from("hello"); // s is valid from this point forward
+
+        // do stuff with s
+    }                                  // this scope is now over, and s is no
+                                       // longer valid
+}
+#+end_src
+
+For scalar data types, variable sizes are known at compile time, so they are stored entirely on the stack. In this case, memory is allocated when a new stackframe is created, and deallocated when the stack frame is popped.
+*** Optimize rust binary for size
+By default on Linux and macOS, symbol information is included in the compiled ~.elf~ file. This information is not needed to properly execute the binary. To remove this, run strip on the ~.elf~ file:
+
+#+begin_src sh
+$ strip target/release/min-sized-rust
+#+end_src
+For more possibilities, see: https://github.com/johnthagen/min-sized-rust
 ** CSS
+*** SCSS
+**** Placeholder class
+In scss, a placeholder class is a class that starts with ~%~ instead of a ~.~
+
+#+begin_src scss
+%flex {
+    display: flex;
+}
+
+.some-real-class {
+    @extend %flex; // This will add %flex styles to current class
+    // other styles
+}
+#+end_src
 *** Collapsible element
 To make a collapsible element with Css, just transition the ~max-height~ property
 
@@ -1431,3 +1747,82 @@ With position ~relative~, the element will be positioned relative to it's normal
 Position ~fixed~ places the element relative to the viewport.
 Position ~abosolute~ is placed relative to the nearest positioned ancestor. (with position ~relative~). \\\*\\\*Absolute positioned elements are removed from normal document flow, and are not part of parent's width and height.
 Position ~sticky~ is a combination of ~relative~ and ~fixed~ position. And it depends on current user's scroll position. \*\*For ~sticky~ positioning to work, at least one of ~left~, ~right~, ~top~, ~bottom~ properties need to be specified.\*\* Useful to implement things like sticky headers as you scroll. (the ones that remain on the top when you scroll past them).
+** C# (csharp)
+*** Debugging c# tests in vscode
+Create a \*.runsettings file, example:
+
+#+begin_src xml
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <ResultsDirectory>.\TestResults</ResultsDirectory>
+
+    <TargetPlatform>x64</TargetPlatform>
+
+    <TargetFrameworkVersion>net48</TargetFrameworkVersion>
+  </RunConfiguration>
+</RunSettings>
+#+end_src
+
+In ~settings.json~, add the file you created:
+#+begin_src json
+    "omnisharp.testRunSettings": "MyRunSettings.runsettings",
+#+end_src
+
+In ~*.csproj~ file, add:
+#+begin_src xml
+<PropertyGroup>
+    ...
+    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+    ...
+</PropertyGroup>
+#+end_src
+
+Create launch.json and tasks.json:
+#+begin_src json
+//tasks
+{
+    "label": "build",
+    "command": "dotnet",
+    "type": "shell",
+    "args": [
+        "build",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+    ],
+    "group": "build",
+    "presentation": {
+        "reveal": "silent"
+    },
+    "problemMatcher": "$msCompile"
+},
+
+
+// launch.json
+    "configurations": [
+        {
+            "name": ".NET Attach debugger",
+            "type": "clr",
+            "request": "attach"
+        },
+        {
+            "name": "Launch tests",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "type": "coreclr",
+            "program": "dotnet",
+            "args": ["test", "--filter", "-v", "n"],
+            "stopAtEntry": false
+        }
+    ],
+#+end_src
+
+The run ~Launch tests~, then wait for a test like this:
+
+#+begin_example
+Process Id: 15304, Name: testhost.net48
+Waiting for debugger attach...
+Process Id: 15304, Name: testhost.net48
+#+end_example
+
+After this, run ~.NET Attach debugger~, and choose the process Id that was specified by previous task
