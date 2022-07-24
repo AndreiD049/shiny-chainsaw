@@ -263,6 +263,26 @@ There are many measurements that can be done for enterprise apps:
 - revisit your notes and try to link them in different ways in order to generate new ideas.
 - don't multitask, it's impossible. multitasking is just fast switching of tasks. it's better to focus on one task at a time to preserve energy
 - willpower is a finite resource that requires time to recover.
+***** Linking smart notes
+By finding the essence of the ideas and linking it with other notes we create a dialog between the notes and take them out of context, which can bring us to new inferences (ideas):
+
+- when adding a note, think in which context will you must likely come across it and link it accordingly (for example if your write about a framework, you can link it with the language, the pattern this framework is using or type of projects it might be used in)
+- add tags based on concrete topic of the note, not abstract or grouping keywords.
+- making smart notes with links between the ideas is an investment that will pay off in the long run
+***** Memorizing versus remembering
+Those are two different concepts. memorization is the ability to pack some information and place it in your long-term memory. On the other hand, remembering is triggered by pulling the correct ropes (neurons?) in our brains that will recall something. Memorization is useless if we can't recall that information later (this how students usually prepare for exams, they memorize the information, but shortly after they cannot recall it, because this information was not linked properly). Writing and linking notes can help a lot with remembering.
+*** Neovim
+**** init.lua aliases in neovim
+#+begin_src lua
+local cmd = vim.cmd  -- to execute Vim commands e.g. cmd('pwd')
+local fn = vim.fn    -- to call Vim functions e.g. fn.bufnr()
+local g = vim.g      -- a table to access global variables
+local opt = vim.opt  -- to set options
+#+end_src
+*** Making plans for the future
+When you plan something for the future, you cannot know if it will make you happy. (you cannot psychologically know it)
+
+Moral of the story: living in the moment is not just a lofty idea from lifestyle books, it's the only way of living your brain can comprehend)
 ** Algorithms
 Here i will document my solutions to various leetcode questions. I will first attempt to solve them in Python or Javascript
 
@@ -353,6 +373,90 @@ There are 2 possible solutions that appear to me as optimal:
 
 1. Sort the array first. It is easy to find out if there are duplicates in a sorted array. The complexity will be then equal to the complexity of sorting. This is a more memory efficient method.
 2. Use a hash map to identify if an element was previously found
+*** Maximum product subarray
+:PROPERTIES:
+:SOURCE:   https://leetcode.com/problems/maximum-product-subarray/
+:END:
+
+Problem:
+#+begin_example
+Given an integer array nums, find a contiguous non-empty subarray within the array that has the largest product, and return the product. It is guaranteed that the answer will fit in a 32-bit integer. A subarray is a contiguous subsequence of the array.
+#+end_example
+
+**** Solution :ATTACH:
+:PROPERTIES:
+:ID:       e58a059c-58de-4516-adbf-8bd3edbe0e3a
+:END:
+This puzzle is easily solved with Dynamic programming What information do we need? When looping through the array, I want to keep track of the maximum product that I encountered so far before.
+
+[[attachment:one.png]]
+
+But there is an issue with the negative numbers. Let's say we have array [-1, -2, 3, -4]. What is the maximum product here.
+[[attachment:two.png]]
+
+Solution to this issue is to keep track both of Max and Min of the previous subarray:
+[[attachment:three.png]]
+
+With this, only 1 special case remains, it's zero. When we encounter a 0, we want to reset both max and min to 1.
+[[attachment:four.png]]
+
+#+begin_src python
+class Solution:
+    def maxProduct(self, nums: List[int]) -> int:
+        maxp = minp = nums[0]
+        answer = nums[0]
+        for num in nums[1:]:
+            if num < 0:
+                # when we have negative values, signs change
+                (maxp, minp) = (minp, maxp)
+            maxp = max(num, maxp * num)
+            minp = min(num, minp * num)
+            answer = max(maxp, answer)
+        return answer
+#+end_src
+
+**** Thoughts
+Dynamic programming uses the concept of memorizing the previous calculations so we don't have to re-compute them again and again. It's actually very similar to Maximum subarray but here we need another variable to keep track of - ~minimum so far~
+*** Maximum subarray
+:PROPERTIES:
+:SOURCE:   https://leetcode.com/problems/maximum-subarray/
+:END:
+#+begin_example
+Given an integer array nums, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.
+
+A subarray is a contiguous part of an array.
+#+end_example
+
+**** Solution
+Solution is based on Kodane's algorithm. (also mentioned Best time to buy) It's a method to find the biggest contiguous positive subarray.
+
+Pseudocode:
+#+begin_src python
+max_so_far = -infinity
+max_result = 0
+
+for each number in array:
+    max_so_far = max_so_far + number
+    max_result = max(max_result, max_so_far)
+    if max_so_far is less than 0: # if sum goes below 0, it's useless for our result, cut it
+        max_so_far = 0 # make sure to reset to 0 if sum went negative
+#+end_src
+
+Python:
+#+begin_src python
+class Solution:
+    # Using Kodane's algorithm
+    def maxSubArray(self, nums: List[int]) -> int:
+            max_so_far = -inf
+            max_ending_here = 0
+            # Loop over elements
+            for num in nums:
+                    max_ending_here += num
+                    max_so_far = max(max_so_far, max_ending_here)
+                    max_ending_here = max(0, max_ending_here)
+            return max_so_far
+#+end_src
+
 ** Design Patterns
 *** Decorator
 [[https://refactoring.guru/design-patterns/decorator][Source - refactoring guru]]
@@ -597,6 +701,10 @@ $filter = (Select-String -Pattern 'UnitTestResult.*testName=\"(\w+)\".*outcome="
 # Then run dotnet command
 dotnet test --filter $filter --logger "trx;logfilename=All3105.trx" -r .\TestResults\
 #+end_src
+*** Measure command execution time
+#+begin_src sh
+Measure-Command { Invoke-Expression "cargo run" | Out-Default }
+#+end_src
 ** Linux
 *** Create symlink
 Links are created using the ~ln~ command.
@@ -644,17 +752,30 @@ grep -r --exclude-dir="node_modules" "pattern"
 1. Navigate to the folder you need
 2. type ~xdg-open .~ to open current folder or ~xdg-open filename~ to open file
 It's the same as ~start~ command in Windows
-** Databases
-*** ACID
+*** List file sizes
+To list file sizes in Linux, use ~-l~ and ~-h~ flags of ~ls~ command
+
+//Example: `ls -lh .` will show something like://
+#+begin_example
+total 3.6M
+drwxr-xr-x 4 andrei andrei 4.0K Jan  9 09:27 build
+drwxr-xr-x 2 andrei andrei 4.0K Jan  9 09:27 deps
+drwxr-xr-x 2 andrei andrei 4.0K Jan  9 09:27 examples
+-rwxr-xr-x 2 andrei andrei 3.6M Jan  9 09:27 guessing_game
+-rw-r--r-- 1 andrei andrei  130 Jan  9 09:27 guessing_game.d
+drwxr-xr-x 2 andrei andrei 4.0K Jan  9 09:27 incremental
+#+end_example
+*** Databases
+**** ACID
 ACID stands for atomicity, consistency, isolation, durability.
 In short it's the ability of the database to handle complex operations as a single transaction, and guarantee data remains valid even after unforeseen issues like outages or other errors.
-*** Postgres SQL
-**** Alter user role in Postgres
-***** Change role
+**** Postgres SQL
+***** Alter user role in Postgres
+****** Change role
 Alter the role afterwards - ~ALTER ROLE rast999 WITH CREATEDB CREATEROLE LOGIN REPLICATION;~
-***** Set a new password
+****** Set a new password
 Setting new password is the same ~ALTER ROLE sample WITH PASSWORD 'newpassword';~
-**** Create postgres database
+***** Create postgres database
 To create a new database:
 #+begin_src sh
 createdb mydb
@@ -667,13 +788,13 @@ dropdb mydb
 #+end_src
 
 It might be that you will get this error - ~createdb: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL: role "rast999" does not exist~. This means that postgres was installed under role ~postgres~ and before logging in you will need to create a new role for your normal user (ex. for ~rast999~). See [[id:a3259d0d-56dd-4eef-8d1c-978efd931b66][Create postgres role]].
-**** Check if Postgres service is running
+***** Check if Postgres service is running
 To check if the service is running on Linux:
 ~sudo service postgresql status~
 
 To start the service if it's not running:
 ~sudo service postgresql start~
-**** Combine queries with union operator
+***** Combine queries with union operator
 Union will combines different queries. Columns in all queries must have the same type. ~UNION~ will remove all duplicates from resulting table. There is also ~UNION ALL~ that will leave the duplicates.
 
 #+begin_src sql
@@ -683,7 +804,7 @@ SELECT surname
 SELECT name
   FROM cd.facilities;
 #+end_src
-**** List users in postgres
+***** List users in postgres
 :PROPERTIES:
 :ID:       0ef0a298-1609-425d-9547-93ffb7e70649
 :END:
@@ -693,7 +814,7 @@ To list the users, run ~SELECT rolname FROM pg_roles;~ (note the ~;~ at the end)
 |-----------+------------------------------------------------------------+-----------|
 | postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}        |
 | rast999   |                                                            | {}        |
-**** Create postgres role
+***** Create postgres role
 :PROPERTIES:
 :ID:       a3259d0d-56dd-4eef-8d1c-978efd931b66
 :END:
@@ -708,18 +829,118 @@ Note: This will create a simple role without any privileges.
 To grant role privileges you can:
 Specify them at creation time - ~CREATE ROLE rast999 CREATEDB CREATEROLE LOGIN REPLICATION;~
 In order to check which users are currently created, see [[id:0ef0a298-1609-425d-9547-93ffb7e70649][List users in postgres]]
-**** Create table
+***** Create table
 #+begin_src sql
 CREATE TABLE table_name (
     name varchar(80),
     area double,
 );
 #+end_src
-**** Delete table
+***** Delete table
 #+begin_src sql
 DROP TABLE table_name;
 #+end_src
+***** Insert data into table
+You can insert values into postgresql via SQL command:
 
+#+begin_src sql
+INSERT INTO cities VALUES ('San Francisco', '(-194.0, 53.0)');
+
+-- or
+
+INSERT INTO weather (city, temp_lo, temp_hi, prcp, date)
+    VALUES ('San Francisco', 43, 57, 0.0, '1994-11-29');
+#+end_src
+
+Or, you can insert directly from a text, or to a text file using the `\copy` command:
+#+begin_src sql
+-- This will copy data from text file to the table
+-- Fields are tab-separated
+\copy table_name FROM '/home/user/Documents/data.txt';
+
+-- This will copy data from table to a text file
+\copy table_name TO '/home/user/Documents/data.txt';
+#+end_src
+***** List tables
+To list all tables in Postgres, use ~\dt~ or ~\dtables~
+
+example output:
+#+begin_example
+                 List of relations
+ Schema |          Name          | Type  |  Owner
+--------+------------------------+-------+---------
+ public | categories             | table | KREAKVA
+ public | customer_customer_demo | table | KREAKVA
+ public | customer_demographics  | table | KREAKVA
+ public | customers              | table | KREAKVA
+ public | employee_territories   | table | KREAKVA
+ public | employees              | table | KREAKVA
+ public | monthly_savings        | table | KREAKVA
+ public | order_details          | table | KREAKVA
+ public | orders                 | table | KREAKVA
+ public | products               | table | KREAKVA
+ public | region                 | table | KREAKVA
+ public | shippers               | table | KREAKVA
+ public | suppliers              | table | KREAKVA
+ public | territories            | table | KREAKVA
+ public | us_states              | table | KREAKVA
+(15 rows)
+#+end_example
+*** Joins
+- **INNER JOIN**, or just **JOIN**. Matches all rows ON a certain condition and keeps only the ones where this condition is true.
+
+#+begin_example
+mydb=> SELECT name, surname, job FROM people JOIN jobs ON name = person_name;
+
+  name  |  surname   |    job
+--------+------------+------------
+ Jane   | Doe        | Accountant
+ John   | Doe        | Accountant
+ Bill   | Gates      | CEO
+ Artiom | Fragkoulis | Artist
+(4 rows)
+#+end_example
+
+- **LEFT OUTER JOIN**. This translates to, get each row from left table at least once, and join it with the table on the right. If nothing to join, leave empty (null). Or, get all data from left table, and matching data from right table. Same with **RIGHT OUTER JOIN** but inverse. There is also **FULL OUTER JOIN**, which is the combination of two (get all data from both tables, where there is no link, leave blank/null)
+
+#+begin_example
+mydb=> SELECT name, surname, job FROM people LEFT OUTER JOIN jobs ON name = person_name;
+
+  name  |  surname   |    job
+--------+------------+------------
+ Jane   | Doe        | Accountant
+ John   | Doe        | Accountant
+ Bill   | Gates      | CEO
+ Artiom | Fragkoulis | Artist
+ Jeff   | Bezos      |                <-- Here there is not data to link
+ Jeff   |            |                <-- Here there is not data to link
+(6 rows)
+#+end_example
+
+- **SELF JOIN**. Self join is nothing more than a simple join, but joining a table with itself. This is done by using table aliases.
+
+#+begin_example
+mydb=> SELECT p1.name, p1.age, p2.name, p2.age FROM people p1 JOIN people p2 ON p1.age > p2.
+age;
+  name  | age |  name  | age
+--------+-----+--------+-----
+ Jane   |  24 | John   |  19
+ Bill   |  70 | Jane   |  24
+ Bill   |  70 | John   |  19
+ Bill   |  70 | Jeff   |  44
+ Bill   |  70 | Jeff   |  51
+ Bill   |  70 | Artiom |  30
+ Jeff   |  44 | Jane   |  24
+ Jeff   |  44 | John   |  19
+ Jeff   |  44 | Artiom |  30
+ Jeff   |  51 | Jane   |  24
+ Jeff   |  51 | John   |  19
+ Jeff   |  51 | Jeff   |  44
+ Jeff   |  51 | Artiom |  30
+ Artiom |  30 | Jane   |  24
+ Artiom |  30 | John   |  19
+(15 rows)
+#+end_example
 *** T-SQL
 :PROPERTIES:
 :ID:       a05ed9e6-09fe-49fd-aa4f-8e1db8d1976c
@@ -801,6 +1022,14 @@ For comments in T-SQL, use:
 -- This is a single line comment
 / this is a multiline comment /
 #+end_src
+**** Logical operators
+-   ~ALL~ - ~X > ALL(A, B, C)~
+-   ~ANY|SOME~ - ~X > ANY|SOME(A, B, C)~
+-   ~IN~ - ~X IN (A, B, C)~
+-   ~NOT IN~ - ~X NOT IN (A, B, C)~
+-   ~BETWEEN~ - ~X BETWEEN A AND B~
+-   ~LIKE~ - ~X LIKE <pattern>~
+-   ~IS [NOT] NULL~ - ~X IS [NOT] NULL~ <– State predicate (always evaluates to TRUE or FALSE)
 ** Elisp (emacs-lisp)
 *** Hello world
 #+begin_src elisp
@@ -1167,6 +1396,18 @@ To drop memory, function ~drop~ is called
 2.  Use ~cargo clippy~
 
 For help use ~cargo help check~ or ~cargo help clippy~
+*** Loop labels
+You can label loops in Rust in order to gain more control.
+
+#+begin_src rust
+fn main() {
+    'outer: loop {
+        loop {
+            break 'outer;
+        }
+    }
+}
+#+end_src
 ** CSS
 *** Collapsible element
 To make a collapsible element with Css, just transition the ~max-height~ property

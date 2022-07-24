@@ -8,6 +8,8 @@
 :ID:       2291a412-ed3a-4b26-a489-ab11deafee44
 :END:
 For basic documentation on typescript see the [[https://www.typescriptlang.org/docs/handbook/2/basic-types.html][Documentation]]
+*** Init project
+In order to initialize a new typescript project, run ~tsc --init~ This will generate a default ~tsconfig.json~ file. In case you want to add webpack with typescript, see [[id:941042b8-f74c-45a2-880c-f34d4b3927ff][Add typescript to webpack]]
 *** Compilation
 Compilation of files can be done in any of the following ways:
 
@@ -31,6 +33,9 @@ Same as ~package.json~ for typescript. Specifies options for Typescript compilat
 - ~noImplicitAny~ - will throw an error in all places where type is ~any~ or is implicitly made ~any~.
 - ~strictNullChecks~ - helps to handle ~null~ and ~undefined~, especially in cases where a value was not initialized and still used
 *** Add typescript to webpack
+:PROPERTIES:
+:ID:       941042b8-f74c-45a2-880c-f34d4b3927ff
+:END:
 -  Install ~ts-loader~
 -  Add a rule to your ~webpack.config.js~
 
@@ -210,6 +215,9 @@ function fromObj({name, age}: {name: string, age: number}) {
 fromObj({name: "Andrei", age: 27});
 #+end_src
 *** Union types
+:PROPERTIES:
+:ID:       9d36525f-8a62-4dcc-a436-2b5fb5d2f0d4
+:END:
 Union types is a way to specify that a value can be any one of union members types. Example ~string | number~ type implies that value is either ~string~ or ~number~.
 
 When we have a union type, it means we can use only properties that are common to \*\*every\*\* type in that union. For example, having variable ~thing~ of type ~string | number~, we cannot just write ~thing.toUpperCase()~ because type ~number~ doesn't have this method.
@@ -244,6 +252,30 @@ interface Employee extends Person {
 }
 #+end_src
 extending multiple types is also possible.
+*** Interfaces
+Interfaces are similar, and mostly interchangeable with Type aliases.
+
+//**Advise**: use interfaces where you can//
+
+Example:
+#+begin_src typescript
+    interface IDisposable {
+        dispose(): void;
+    };
+#+end_src
+*** Literal types
+Literal types are types consisting of literal values (obviously).
+
+Example:
+~const value = "hello"~, it's type will be ~"hello"~
+Or we can write ~let value: "hello" = "hello"~ . Then if i try to assign any other value to this variable, it will complain.
+Very useful together with [[id:9d36525f-8a62-4dcc-a436-2b5fb5d2f0d4][Union types]] to declare types that can have only certain values. The ~Typescript keyof operator~ will produce a ~literal union type~ of all object's properties
+
+#+begin_src typescript
+type direction = "up" | "down" | "left" | "right";
+#+end_src
+
+You can have ~number~ literal types too (~1 | 2 | 3 | 4~).
 ** Add eslint to project
 - Install eslint – ~npm i -D eslint~
 - Run – ~npx eslint --init~
@@ -265,6 +297,9 @@ module.exports = {
 };
 #+end_src
 *** Add typescript to jest
+:PROPERTIES:
+:ID:       1a22ee81-6d10-474b-b741-e1c8021a330c
+:END:
 If you want to add typescript support, ~npm i --D @babel/preset-typescript @types/jest~
 
 Then add ~@babel/preset-typescript~ to the list of presets in your ~babel.config.js~.
@@ -276,6 +311,61 @@ module.exports = {
     '@babel/preset-typescript', // <-- this
   ],
 };
+#+end_src
+*** Install
+:PROPERTIES:
+:ID:       3a35f0d1-34f1-46b8-bbe5-eba868516ae5
+:END:
+~npm i -D jest @types/jest~
+*** Stub irrelevan files
+Some files are not needed while testing with Jest, like ~.png~ or ~.scss~ files.
+
+In order to stub them, add following to your ~jest.config.js~:
+
+#+begin_src js
+// A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
+"moduleNameMapper": {
+    "\\.(css|less|scss)$": "<rootDir>/__mocks__/styleMock.js",
+    "\\.(gif|ttf|eot|svg|png)$": "<rootDir>/__mocks__/fileMock.js",
+},
+#+end_src
+
+And create respective files
+#+begin_src js
+/** styleMock.js */
+module.exports = {};
+#+end_src
+
+#+begin_src
+/** fileMock.js */
+module.exports = 'test-file-stub';
+#+end_src
+*** With @testing-library
+As oposed to enzyme, you can use @testing-library with jest.
+
+1. [[id:3a35f0d1-34f1-46b8-bbe5-eba868516ae5][Install]], or if you want typescript [[id:1a22ee81-6d10-474b-b741-e1c8021a330c][Add typescript to jest]]
+2.  ~npm i -D @testing-library/react @testing-library/jest-dom~ (you might need to install a lower version of @testing-library/react if it complains about 'react-dom')
+3.  If you're using babel, ~npm i -D @babel/preset-react~ and add it to ~babel.config.js~
+4.  Start writing tests, see their example and cheatsheet
+*** Testing react with enzyme
+In order to test react components, install ~enzyme~:
+~npm i -D enzyme enzyme-adapter-react-16 @types/enzyme jest-environment-jsdom~
+
+Create following setup files:
+
+#+begin_src js
+// ./tests/setupTest.js
+const { configure } = require("enzyme");
+const Adapter = require("enzyme-adapter-react-16");
+configure({ adapter: new Adapter() });
+```
+
+Then add this to your `jest.config.js`
+#+end_src
+
+#+begin_src js
+// The paths to modules that run some code to configure or set up the testing environment before each test
+setupFiles: ["./tests/setupTest.js"],
 #+end_src
 ** Add prettier to project
 *** Install
@@ -597,3 +687,18 @@ npm i -D rollup rollup-plugin-typescript2 rollup-plugin-visualizer rollup-plugin
 #+end_src
 **** Example config file :ATTACH:
 Copy [[attachment:rollup.config.js][config]] file to project
+** Falsy values
+Values that evaluate to ~false~ in Javascript
+
+1. 0
+2. NaN
+3. "" (empty string)
+4. 0n (the bigint version of 0)
+5. null
+6. undefined
+** Lerna
+*** Lerna scope multiple packages
+Example:
+#+begin_src sh
+lerna run build --scope '{sp-preset,*notificat*,*proper*}'
+#+end_src
