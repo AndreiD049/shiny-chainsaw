@@ -949,6 +949,141 @@ dotnet test --filter $filter --logger "trx;logfilename=All3105.trx" -r .\TestRes
 #+begin_src sh
 Measure-Command { Invoke-Expression "cargo run" | Out-Default }
 #+end_src
+*** Add command line arguments
+Powershell add command line arguments
+
+#+begin_src sh
+[CmdletBinding()]
+param (
+    [Parameter()]
+    [string]
+    $paths,
+    [Parameter()]
+    [string]
+    $destination
+)
+
+# Logic
+Write-Output "$paths and $destination"
+#+end_src
+*** Check if file exists
+Powershell check if file or folder exists:
+
+#+begin_src sh
+if (-Not (Test-Path -Path $paths)) {
+# Logic
+}
+#+end_src
+*** Create array
+:PROPERTIES:
+:SOURCE:   https://docs.microsoft.com/en-us/powershell/scripting/learn/deep-dives/everything-about-arrays?view=powershell-7.2
+:END:
+#+begin_src sh
+$data = @('Zero','One','Two','Three')
+#+end_src
+*** Split long command over multiple lines
+:PROPERTIES:
+:SOURCE:   https://stackoverflow.com/questions/2608144/how-to-split-long-commands-over-multiple-lines-in-powershell
+:END:
+In order to split a command, use backticks  ~`~:
+
+#+begin_src sh
+&"C:\Program Files\IIS\Microsoft Web Deploy\msdeploy.exe" `
+-verb:sync `
+-source:contentPath="c:\workspace\xxx\master\Build\_PublishedWebsites\xxx.Web" `
+-dest:contentPath="c:\websites\xxx\wwwroot,computerName=192.168.1.1,username=administrator,password=xxx"
+#+end_src
+*** Throw exception
+:PROPERTIES:
+:SOURCE:   https://docs.microsoft.com/en-us/powershell/scripting/learn/deep-dives/everything-about-exceptions?view=powershell-7.2
+:END:
+#+begin_src sh
+function Start-Something
+{
+    throw "Bad thing happened"
+}
+#+end_src
+*** Try/catch
+:PROPERTIES:
+:SOURCE:   https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_try_catch_finally?view=powershell-7.2
+:END:
+#+begin_src sh
+try {
+   $wc = new-object System.Net.WebClient
+   $wc.DownloadFile("http://www.contoso.com/MyDoc.doc","c:\temp\MyDoc.doc")
+}
+catch [System.Net.WebException],[System.IO.IOException] {
+    "Unable to download MyDoc.doc from http://www.contoso.com."
+}
+catch {
+    "An error occurred that could not be resolved."
+}
+#+end_src
+*** Validate xml schema
+Following script can be used to validate an XML Schema in Powershell:
+
+#+begin_src sh
+function Test-XmlSchema
+{
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path $_})]
+        [String]
+        $XmlPath,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path $_})]
+        [String]
+        $SchemaPath
+    )
+
+    $schemas = New-Object System.Xml.Schema.XmlSchemaSet
+       $schemas.CompilationSettings.EnableUpaCheck = $false
+       $schema = ReadSchema $SchemaPath
+       [void]($schemas.Add($schema))
+       $schemas.Compile()
+
+       try
+    {
+        [xml]$xmlData = Get-Content $XmlPath
+              $xmlData.Schemas = $schemas
+
+        #Validate the schema. This will fail if is invalid schema
+              $xmlData.Validate($null)
+              return $true
+       }
+    catch [System.Xml.Schema.XmlSchemaValidationException]
+    {
+              return $false
+       }
+}
+
+Function ReadSchema
+{
+       param($SchemaPath)
+       try
+    {
+              $schemaItem = Get-Item $SchemaPath
+              $stream = $schemaItem.OpenRead()
+              $schema = [Xml.Schema.XmlSchema]::Read($stream, $null)
+              return $schema
+       }
+       catch
+    {
+              throw
+       }
+       finally
+    {
+              if($stream)
+        {
+                     $stream.Close()
+              }
+       }
+}
+
+Export-ModuleMember -Function Test-XmlSchema
+#+end_src
 ** Linux
 *** Create symlink
 Links are created using the ~ln~ command.
@@ -1014,6 +1149,15 @@ drwxr-xr-x 2 andrei andrei 4.0K Jan  9 09:27 incremental
 ACID stands for atomicity, consistency, isolation, durability.
 In short it's the ability of the database to handle complex operations as a single transaction, and guarantee data remains valid even after unforeseen issues like outages or other errors.
 **** Postgres SQL
+***** Postgres is a Open source object relational database
+1. Documentation – https://www.postgresql.org/docs/
+2. Other online resources – https://www.postgresql.org/docs/online-resources/
+3. Exercises – https://pgexercises.com/gettingstarted.html
+
+***** To revisit
+- Creating views – https://www.postgresql.org/docs/current/tutorial-views.html
+- Window functions – https://www.postgresql.org/docs/current/tutorial-window.html
+- Inheritance – https://www.postgresql.org/docs/current/tutorial-inheritance.html
 ***** Alter user role in Postgres
 ****** Change role
 Alter the role afterwards - ~ALTER ROLE rast999 WITH CREATEDB CREATEROLE LOGIN REPLICATION;~
@@ -1826,3 +1970,16 @@ Process Id: 15304, Name: testhost.net48
 #+end_example
 
 After this, run ~.NET Attach debugger~, and choose the process Id that was specified by previous task
+
+** Power query
+In Power query editor, create a new blank query and add there:
+
+#+begin_src js
+(TheNumber as number) =>
+let
+    Source = TheNumber * TheNumber
+in
+    Source
+#+end_src
+
+For list of available types, see [[https://docs.microsoft.com/en-us/powerquery-m/m-spec-types][here]]
