@@ -878,7 +878,7 @@ Add a action property to the manifest. See [[id:971eea90-a5a4-45c6-b8c6-42b6d54a
 :PROPERTIES:
 :ID:       e1d81e89-b499-42a8-a2d2-368d0a23e8d5
 :END:
-1. Create an Ssh key with Powershell ~ssh-keygen -c andrei.dimitrascu@gmail.com~
+1. Create an Ssh key with Powershell ~ssh-keygen -C andrei.dimitrascu@gmail.com~
 2. run in ~Powershell Get-Content -Path $HOME\.ssh\id_rsa.pub | Set-Clipboard~ to save your public key to the clipboard
 3. Go to https://github.com/settings/ssh/new and add the content of your public key file
 4. Restart all terminal sessions, if =HOME= Environmental variable is set
