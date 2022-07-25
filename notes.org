@@ -878,7 +878,7 @@ Add a action property to the manifest. See [[id:971eea90-a5a4-45c6-b8c6-42b6d54a
 :PROPERTIES:
 :ID:       e1d81e89-b499-42a8-a2d2-368d0a23e8d5
 :END:
-1. Create an Ssh key with Powershell ~ssh-keygen -c andrei.dimitrascu@gmail.com~
+1. Create an Ssh key with Powershell ~ssh-keygen -C andrei.dimitrascu@gmail.com~
 2. run in ~Powershell Get-Content -Path $HOME\.ssh\id_rsa.pub | Set-Clipboard~ to save your public key to the clipboard
 3. Go to https://github.com/settings/ssh/new and add the content of your public key file
 4. Restart all terminal sessions, if =HOME= Environmental variable is set
@@ -1084,9 +1084,19 @@ Function ReadSchema
 
 Export-ModuleMember -Function Test-XmlSchema
 #+end_src
-** Linux
+*** Replace values in string
+To replace a string:
+#+begin_src sh
+"String From".Replace("From", "T") --> "String To"
+#+end_src
+
+To replace a regex:
+#+begin_src sh
+"String From1" -replace "From\d", "To"
+#+end_src
+** Linux :linux:
 *** Create symlink
-Links are created using the ~ln~ command.
+Links in Linux are created using the ~ln~ command.
 
 #+begin_src sh
 ln -sf ~/dotfiles/nvim ~/.config/nvim
@@ -1144,26 +1154,26 @@ drwxr-xr-x 2 andrei andrei 4.0K Jan  9 09:27 examples
 -rw-r--r-- 1 andrei andrei  130 Jan  9 09:27 guessing_game.d
 drwxr-xr-x 2 andrei andrei 4.0K Jan  9 09:27 incremental
 #+end_example
-*** Databases
-**** ACID
+** Databases
+*** ACID
 ACID stands for atomicity, consistency, isolation, durability.
 In short it's the ability of the database to handle complex operations as a single transaction, and guarantee data remains valid even after unforeseen issues like outages or other errors.
-**** Postgres SQL
-***** Postgres is a Open source object relational database
+*** Postgres SQL
+**** Postgres is a Open source object relational database
 1. Documentation – https://www.postgresql.org/docs/
 2. Other online resources – https://www.postgresql.org/docs/online-resources/
 3. Exercises – https://pgexercises.com/gettingstarted.html
 
-***** To revisit
+**** To revisit
 - Creating views – https://www.postgresql.org/docs/current/tutorial-views.html
 - Window functions – https://www.postgresql.org/docs/current/tutorial-window.html
 - Inheritance – https://www.postgresql.org/docs/current/tutorial-inheritance.html
-***** Alter user role in Postgres
-****** Change role
+**** Alter user role in Postgres
+***** Change role
 Alter the role afterwards - ~ALTER ROLE rast999 WITH CREATEDB CREATEROLE LOGIN REPLICATION;~
-****** Set a new password
+***** Set a new password
 Setting new password is the same ~ALTER ROLE sample WITH PASSWORD 'newpassword';~
-***** Create postgres database
+**** Create postgres database
 To create a new database:
 #+begin_src sh
 createdb mydb
@@ -1176,13 +1186,13 @@ dropdb mydb
 #+end_src
 
 It might be that you will get this error - ~createdb: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL: role "rast999" does not exist~. This means that postgres was installed under role ~postgres~ and before logging in you will need to create a new role for your normal user (ex. for ~rast999~). See [[id:a3259d0d-56dd-4eef-8d1c-978efd931b66][Create postgres role]].
-***** Check if Postgres service is running
+**** Check if Postgres service is running
 To check if the service is running on Linux:
 ~sudo service postgresql status~
 
 To start the service if it's not running:
 ~sudo service postgresql start~
-***** Combine queries with union operator
+**** Combine queries with union operator
 Union will combines different queries. Columns in all queries must have the same type. ~UNION~ will remove all duplicates from resulting table. There is also ~UNION ALL~ that will leave the duplicates.
 
 #+begin_src sql
@@ -1192,7 +1202,7 @@ SELECT surname
 SELECT name
   FROM cd.facilities;
 #+end_src
-***** List users in postgres
+**** List users in postgres
 :PROPERTIES:
 :ID:       0ef0a298-1609-425d-9547-93ffb7e70649
 :END:
@@ -1202,7 +1212,7 @@ To list the users, run ~SELECT rolname FROM pg_roles;~ (note the ~;~ at the end)
 |-----------+------------------------------------------------------------+-----------|
 | postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}        |
 | rast999   |                                                            | {}        |
-***** Create postgres role
+**** Create postgres role
 :PROPERTIES:
 :ID:       a3259d0d-56dd-4eef-8d1c-978efd931b66
 :END:
@@ -1217,18 +1227,18 @@ Note: This will create a simple role without any privileges.
 To grant role privileges you can:
 Specify them at creation time - ~CREATE ROLE rast999 CREATEDB CREATEROLE LOGIN REPLICATION;~
 In order to check which users are currently created, see [[id:0ef0a298-1609-425d-9547-93ffb7e70649][List users in postgres]]
-***** Create table
+**** Create table
 #+begin_src sql
 CREATE TABLE table_name (
     name varchar(80),
     area double,
 );
 #+end_src
-***** Delete table
+**** Delete table
 #+begin_src sql
 DROP TABLE table_name;
 #+end_src
-***** Insert data into table
+**** Insert data into table
 You can insert values into postgresql via SQL command:
 
 #+begin_src sql
@@ -1249,7 +1259,7 @@ Or, you can insert directly from a text, or to a text file using the `\copy` com
 -- This will copy data from table to a text file
 \copy table_name TO '/home/user/Documents/data.txt';
 #+end_src
-***** List tables
+**** List tables
 To list all tables in Postgres, use ~\dt~ or ~\dtables~
 
 example output:
@@ -1274,7 +1284,7 @@ example output:
  public | us_states              | table | KREAKVA
 (15 rows)
 #+end_example
-*** Joins
+**** Joins
 - **INNER JOIN**, or just **JOIN**. Matches all rows ON a certain condition and keeps only the ones where this condition is true.
 
 #+begin_example
