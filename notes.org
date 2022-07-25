@@ -1084,9 +1084,9 @@ Function ReadSchema
 
 Export-ModuleMember -Function Test-XmlSchema
 #+end_src
-** Linux
+** Linux :linux:
 *** Create symlink
-Links are created using the ~ln~ command.
+Links in Linux are created using the ~ln~ command.
 
 #+begin_src sh
 ln -sf ~/dotfiles/nvim ~/.config/nvim
