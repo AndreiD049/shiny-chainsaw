@@ -1085,6 +1085,9 @@ Function ReadSchema
 Export-ModuleMember -Function Test-XmlSchema
 #+end_src
 *** Replace values in string
+:PROPERTIES:
+:SOURCE:   https://adamtheautomator.com/powershell-replace/#:~:text=You%20don't%20need%20to,using%20a%20variable%20for%20convenience.
+:END:
 To replace a string:
 #+begin_src sh
 "String From".Replace("From", "T") --> "String To"

@@ -1,0 +1,4 @@
+* Inbox
+** [ ] Check org-file-apps to see how to open file in excel directly
+
+[[file:~/OneDrive - Katoen Natie/Wiki/org/work/journal.org::*Update invoicing template Mitsui Phenols][Update invoicing template Mitsui Phenols]]
