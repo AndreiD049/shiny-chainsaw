@@ -1441,6 +1441,8 @@ SQL server executes the queries in following order:
 5.  SELECT
 6.  ORDER BY
 ** Elisp (emacs-lisp)
+*** Resources
+Resource list from the doomer himself: [[https://discourse.doomemacs.org/t/other-learning-resources/48][https://discourse.doomemacs.org/t/other-learning-resources/48]]
 *** Hello world
 #+begin_src elisp
   (print "Hello world")
