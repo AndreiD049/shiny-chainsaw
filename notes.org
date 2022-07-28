@@ -1741,6 +1741,7 @@ Steps:
 #+begin_src typescript
 build.tslintCmd.enabled = false;
 #+end_src
+*** IDEA Store user specific data, like cache, or read comments, in his own OneDrive, in a json document for example
 ** Rust
 :PROPERTIES:
 :ID:       fb389731-9b2f-4380-98af-21ad3e832e66
