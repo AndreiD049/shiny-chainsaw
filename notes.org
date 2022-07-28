@@ -1568,6 +1568,60 @@ The template for this function looks like this
 #+end_example
 ** Common LISP
 Currently reading: [[https://gigamonkeys.com/book/practical-a-simple-database.html][Book]]
+*** Functions in common lisp
+:PROPERTIES:
+:SOURCE:   https://gigamonkeys.com/book/functions.html
+:END:
+#+begin_src emacs-lisp
+;; Mandatory parameters, all should be supplied
+(defun func (a b c) ...)
+
+;; Optional parameters, should be supplied in same order, but some are optional
+(defun func (&optional a b c) ...)
+
+;; All types of parameters can be combined
+;; Optional parameters can have a default value (like D here) and also a boolean showing if it was really supplied or not
+(defun func (a b &optional c (d 10 d-supplied-p)) ...)
+
+;; variable parameters (varargs), any number of parameters can be passed to the function
+;; All of them will be "caught" by this last VALUES paramter
+(defun func (a b &rest values) ...)
+
+;; keyword parameter are like optional ones, but more flexible
+;; since they can be called in different order
+(defun func (&key a (b 20) (c 10 c-supplied-p)) ...)
+;; can then be called
+(func (:b 1 :a 2))
+
+;; HOF:: you can supply functions as arguments
+(sort (function x) list)
+;; (function x) has a shortcut - #'x
+(sort #'x list)
+
+;; Anonymous functions are defined with (lambda ...)
+(sort #'(lambda (x y) ...body) list)
+#+end_src
+*** Variables in common lisp
+:PROPERTIES:
+:SOURCE:   https://gigamonkeys.com/book/variables.html
+:END:
+Common lisp are of 2 different types:
+- Dynamic a.k.a global
+- Lexical a.k.a local variables
+
+**Lexical** variables are the ones that are bound by function parameters, or **let** expression.
+
+#+start_src common-lisp
+(defun myfunc (a b)
+    "Here A and B are lexically scoped variables
+They can be used only within the function definition.
+Or passed as parameters to other functions.
+Or captured in a closure"
+  (+ a b)
+  (foo a b)
+  #'(lambda () (+ a b 1))) ; Captures both variables A and B in a closure
+#+end_src
+
 ** Sharepoint
 *** API permissions setup in sharepoint
 Setup Graph API permissions
