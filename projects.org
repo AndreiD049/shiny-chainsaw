@@ -1,5 +1,28 @@
 #+title: Projects
 * PROJ Sharepoint CIP
+** DONE Add switch to "Show/hide categories"
+:LOGBOOK:
+CLOCK: [2022-07-29 Fri 10:19]--[2022-07-29 Fri 11:41] =>  1:22
+:END:
+User doesn't always want to see tasks categorized.
+For example: When user watches his own tasks, there might be not too many tasks and
+having the categories shown, might make it less visible.
+On the top bar, we can add a switch to show/hide the categories
+#+begin_example
++--------------------------------------------------------------------------------------------------------------------------------+
+|                                                                          ++-+---+  +--------------+  +-----------------------+ |
+|                                                              Switch ---> |  |+++|  | Open tasks   |  | Search                | |
+|                                                                          ++-+---+  +--------------+  +-----------------------+ |
++--------------------------------------------------------------------------------------------------------------------------------+
+#+end_example
+
 ** TODO Add sorting to the table
 ** TODO Enable editing of logged times
 If user made a mistake when loggin time, he should be able to correct it.
+** TODO Fix quick search
+When search doesn't catch any items, all of them are shown by default.
+Also, search should work in subtasks as well. Needs a re-check.
+** TODO Add column filter to Progress, DueDate and Timing columns
+*** TODO Add numerical column filter
+*** TODO Add date column filter
+* PROJ Sharepoint Daily Tasks
