@@ -1,0 +1,5 @@
+#+title: Projects
+* PROJ Sharepoint CIP
+** TODO Add sorting to the table
+** TODO Enable editing of logged times
+If user made a mistake when loggin time, he should be able to correct it.
