@@ -58,6 +58,10 @@ When user clicks on a column header, it will be sorted. Sorting can be:
 />
 
 #+end_src
+** DONE Refactor =sorting.ts=
+Don't store sorting functions inside a Map.
+Instead, =columnSortFunctions= should have a function as value, that receives the sorting direction.
+That should look a little bit cleaner
 
 ** TODO Fix quick search
 When search doesn't catch any items, all of them are shown by default.
