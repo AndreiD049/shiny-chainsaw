@@ -16,13 +16,79 @@ On the top bar, we can add a switch to show/hide the categories
 +--------------------------------------------------------------------------------------------------------------------------------+
 #+end_example
 
-** TODO Add sorting to the table
-** TODO Enable editing of logged times
-If user made a mistake when loggin time, he should be able to correct it.
+** DONE Add sorting to the table
+#+BEGIN: clocktable :scope subtree :maxlevel 2
+#+CAPTION: Clock summary at [2022-07-29 Fri 16:48]
+| Headline                     | Time   |      |
+|------------------------------+--------+------|
+| *Total time*                 | *2:36* |      |
+|------------------------------+--------+------|
+| \_  Add sorting to the table |        | 2:36 |
+#+END:
+
+:LOGBOOK:
+CLOCK: [2022-07-29 Fri 15:28]--[2022-07-29 Fri 16:48] =>  1:20
+CLOCK: [2022-07-29 Fri 14:00]--[2022-07-29 Fri 15:16] =>  1:16
+:END:
++ Sorting should work only on main tasks
++ Sorting is affected by Showing or hiding categories
+*** Description
+When user clicks on a column header, it will be sorted. Sorting can be:
++ Ascending
++ Descending
++ No sorting
+
+*** Pseudocode
+#+begin_src typescript
+/* -- STATE -- */
+{
+    filters: [...]
+    sorting: {
+        column: "Title",
+        direction: ASC | DESC
+    }
+}
+
+/* -- Column header cell -- */
+
+<Column
+    ...
+    onClick={(column) => dispatch({type: "SORT", column: "Title"})}
+    ...
+/>
+
+#+end_src
+
 ** TODO Fix quick search
 When search doesn't catch any items, all of them are shown by default.
 Also, search should work in subtasks as well. Needs a re-check.
+** TODO Fix dropping files on attachment area
+When first dragging the file over the label, it starts flickering
+** TODO Enable editing of logged times
+If user made a mistake when loggin time, he should be able to correct it.
 ** TODO Add column filter to Progress, DueDate and Timing columns
 *** TODO Add numerical column filter
 *** TODO Add date column filter
+** TODO Add buttons Clear filters & Clear sorting if those are applied
+** TODO Fix Cip Command bar on mobile
+Far items are overflowing on mobile devices.
+Render them in an [[https://developer.microsoft.com/en-us/fluentui#/controls/web/overflowset][Overflow set]]
 * PROJ Sharepoint Daily Tasks
+* PROJ Sharepoint Task Agenda
+Task agenda should present to a user a Calendar interface with following views:
++ Weekly - Shows current week (7 days)
++ Monthly - Shows next 6 months
++ Yearly - Shows next 5 years. **Not sure yet we need it.**
+
+** Sample layout
+
+Weekly view
+
+| -     | Mon 25/07 | Tue 26/07 | Wed 27/07 | Thu 28/07 | Fri 29/07 | Sat 30/07 | Sun 31/07 |
+|-------+-----------+-----------+-----------+-----------+-----------+-----------+-----------|
+| User1 | ACTION1   | ACTION2   | ACTION3   | ACTION4   | ACTION5   |           |           |
+| User2 | ACTION1   |           |           |           |           |           |           |
+| User3 |           |           | ACTION1   |           |           |           |           |
+| User4 |           |           |           |           | ACTION1   |           |           |
+| ....  |           |           |           |           |           |           |           |
+| UserN |           |           |           |           |           | ACTION1   |           |
