@@ -1568,6 +1568,9 @@ The template for this function looks like this
 #+end_example
 ** Common LISP
 Currently reading: [[https://gigamonkeys.com/book/practical-a-simple-database.html][Book]]
+*** Resources
+1) [[https://gigamonkeys.com/book/][Practical Common Lisp]]
+2) [[https://lispcookbook.github.io/cl-cookbook/iteration.html][Lisp cook book]]
 *** Functions in common lisp
 :PROPERTIES:
 :SOURCE:   https://gigamonkeys.com/book/functions.html
@@ -1611,7 +1614,7 @@ Common lisp are of 2 different types:
 
 **Lexical** variables are the ones that are bound by function parameters, or **let** expression.
 
-#+start_src common-lisp
+#+begin_src common-lisp
 (defun myfunc (a b)
     "Here A and B are lexically scoped variables
 They can be used only within the function definition.
@@ -1621,6 +1624,64 @@ Or captured in a closure"
   (foo a b)
   #'(lambda () (+ a b 1))) ; Captures both variables A and B in a closure
 #+end_src
+
+**Dynamic** variables are defined with **DEFVAR** and **DEFPARAMETER**.
+#+begin_comment
+Difference between DEFVAR and DEFPARAMETER is visible only when reloading the environment.
+DEFVAR does assign a value to the variable only if it's undefined, while DEFPARAMETER does this
+every time the environment is restarted.
+#+end_comment
+
+**Constant** values are defined with DEFCONSTANT
+*** COMMENT Constrol constructs
+Common constrol constructs in lisp are:
++ IF statement. What makes them harder to use is that yuo can have only one form as =then= or =else= parts.
+  If you want to extend this, you can use =progn=
+  #+begin_src common-lisp
+(if (cond)
+    (then-form)
+  (else-form))
+  #+end_src
++ WHEN and UNLESS are constructs that also help with evaluating more forms conditionally.
+  #+begin_src common-lisp
+;; When something is true, execute the body
+(when (condition)
+  (form-1)
+  (form-n))
+
+;; When something is false, executer the body
+(unless (condition)
+  (form-1)
+  (form-n))
+  #+end_src
++ COND is a construct that helps write branches like if - else if - else
+#+begin_src common-lisp
+(cond ((< 1 0) (print "impossible"))
+      ((= 1 2) (print "please no"))
+      (t (print "This is the else")))
+#+end_src
+
+#+RESULTS:
+: This is the else
+**** LOOPS in common-lisp
++ DOLIST and DOTIMES are just abstraction macros over the more generic DO macros
+#+begin_src emacs-lisp
+;; DO construct
+(DO ((i 0 (+ i 1)))
+    ((> i 10) i)
+  (print i))
+
+;; DOLIST construct
+(dolist (i '(1 2 3 4 5 6))
+  (print i))
+
+;; DOTIMES construct
+(dotimes (i 10)
+  (print i))
+
+#+end_src
++ LOOP macro is a very powerfull looping mechanism
+  Some examples of LOOP can be seen [[https://lispcookbook.github.io/cl-cookbook/iteration.html][here]]
 
 ** Sharepoint
 *** API permissions setup in sharepoint
