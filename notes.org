@@ -1633,7 +1633,7 @@ every time the environment is restarted.
 #+end_comment
 
 **Constant** values are defined with DEFCONSTANT
-*** COMMENT Constrol constructs
+*** Constrol constructs
 Common constrol constructs in lisp are:
 + IF statement. What makes them harder to use is that yuo can have only one form as =then= or =else= parts.
   If you want to extend this, you can use =progn=
@@ -1682,6 +1682,40 @@ Common constrol constructs in lisp are:
 #+end_src
 + LOOP macro is a very powerfull looping mechanism
   Some examples of LOOP can be seen [[https://lispcookbook.github.io/cl-cookbook/iteration.html][here]]
+*** Macros
+**** Destructuring parameters
+When desigining a macro, you might want to group some parameters together by their meaning.
+For example:
+#+begin_src common-lisp
+;; This is an example call
+(my-do-times (x 0 19))
+
+;; You might want to do it like this
+(defmacro my-do-times (var-range)
+  (let ((var (first var-range))
+        (start (second var-range))
+        (end (third var-range)))
+    `(do-the-expansion)))
+#+end_src
+
+While this would work. There is a shorter way, called destructuring parameters.
+
+#+begin_src common-lisp
+(defmacro my-do-times ((var start end))
+  `(do-the-expansion))
+#+end_src
+**** Backquote =`= construct
+When building macros, the =`= (which is shorthand for function =backquote=) is very handy.
+Basically what is does, it prevents the form being evaluated, like with =quote=, but you can also evaluate certain
+forms that you need, so basically it works just like string with placeholders, but for generating code.
+
+| Backquote Syntax    | Equivalent List-Building Code           | Result           |
+|                     |                                         |                  |
+| `(a (+ 1 2) c)      | (list 'a '(+ 1 2) 'c)                   | (a (+ 1 2) c)    |
+| `(a ,(+ 1 2) c)     | (list 'a (+ 1 2) 'c)                    | (a 3 c)          |
+| `(a (list 1 2) c)   | (list 'a '(list 1 2) 'c)                | (a (list 1 2) c) |
+| `(a ,(list 1 2) c)  | (list 'a (list 1 2) 'c)                 | (a (1 2) c)      |
+| `(a ,@(list 1 2) c) | (append (list 'a) (list 1 2) (list 'c)) | (a 1 2 c)        |
 
 ** Sharepoint
 *** API permissions setup in sharepoint
