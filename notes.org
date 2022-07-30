@@ -1716,6 +1716,34 @@ forms that you need, so basically it works just like string with placeholders, b
 | `(a (list 1 2) c)   | (list 'a '(list 1 2) 'c)                | (a (list 1 2) c) |
 | `(a ,(list 1 2) c)  | (list 'a (list 1 2) 'c)                 | (a (1 2) c)      |
 | `(a ,@(list 1 2) c) | (append (list 'a) (list 1 2) (list 'c)) | (a 1 2 c)        |
+**** Preventing leaks in macros
+:PROPERTIES:
+:ID:       6b4c6564-7ddb-46d6-b256-18e7c272747c
+:END:
+
+There are certain scenarios when macros can cause problems.
+
+1. When a parameter passed to a macro is evaluated more than once.
+   User might be using a =random= form and evaluating it more than once will yiels differnt results
+   =Fix=: Make sure every parameter passed to a macro is evaluated only once, by placing it in a binding construct
+   like =let=.
+2. Forms passed as parameters are evaluated in different order as they were passed to the macro
+   This might have really undesirable effect if those forms have any kind of side effects.
+   =Fix=: Always place the placeholders in the order they were supplied to the macro.
+3. Helper symbols bound in the macro body might unintentionally shadow some outer variables, leading
+   to incorrect behavior or infinite loops.
+   =Fix=: In order to avoid collisions, use functions as [[id:696f7aef-a198-4aa7-8226-a34e1719b960][Gensym]]
+**** Gensym
+:PROPERTIES:
+:ID:       696f7aef-a198-4aa7-8226-a34e1719b960
+:END:
+Gensym function generates a symbol that is meant to be unique whithin current lisp program runtime.
+This is particularly usefull when writing [[id:6b4c6564-7ddb-46d6-b256-18e7c272747c][macros]].
+
+#+begin_src common-lisp
+(let ((random-symbol (gensym)))
+  (print random-symbol))
+#+end_src
 
 ** Sharepoint
 *** API permissions setup in sharepoint
