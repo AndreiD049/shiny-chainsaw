@@ -1710,7 +1710,7 @@ Basically what is does, it prevents the form being evaluated, like with =quote=,
 forms that you need, so basically it works just like string with placeholders, but for generating code.
 
 | Backquote Syntax    | Equivalent List-Building Code           | Result           |
-|                     |                                         |                  |
+|---------------------+-----------------------------------------+------------------|
 | `(a (+ 1 2) c)      | (list 'a '(+ 1 2) 'c)                   | (a (+ 1 2) c)    |
 | `(a ,(+ 1 2) c)     | (list 'a (+ 1 2) 'c)                    | (a 3 c)          |
 | `(a (list 1 2) c)   | (list 'a '(list 1 2) 'c)                | (a (list 1 2) c) |
