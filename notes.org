@@ -11,19 +11,14 @@ Useful resources:
 - [[http://doc.norang.ca/org-mode.html][Org Mode - Organize Your Life In Plain Text!]]
 *** Initial comfortable setup
 I find this initial setup quite comfortable to use.
-Add below to y......fig =init.el= file:
-            ... ...  ..
-#+begin_src..macs   ..
+Add below to your config =init.el= file:
+
+#+begin_sr emacs-lisp
 (defun orgmode-setup ()
   (progn
     (require 'org-tempo)
     (org-indent-mode)
-    (key-binding (kbd "C-c h o") 'outline-hide-other)
-    (define-key org-mode-map (kbd "C-c h o") 'outline-hide-other)
-    (setq org-id-link-to-org-use-id 'create-if-interactive)
-    (auto-fill-mode)
-    (set-fill-column 78)
-    (message "Org-mode set up ;)"))
+    (setq org-id-link-to-org-use-id t))
   )
 (add-hook 'org-mode-hook 'orgmode-setup)
 #+end_src
@@ -64,7 +59,7 @@ Then, you can insert a code block by just typing =<s <TAB>=
 Any line starting with =|= symbol is interpreted as a table.  For
 example wtite =|Name|Surname|Age + <TAB>= and you will start a table
 **** TODO Useful shortcuts
-*** Add file to org-agenda edited
+*** Add file to org-agenda
 :PROPERTIES:
 :ID: 1ed495c7-4875-4d98-88c7-511718c4850e
 :END:
@@ -125,6 +120,9 @@ mode, you can press =C-c '= and a new buffer will be opened where you can edit
 the code. Then, after you're done, press =C-c '= again and code will be
 transferred to org mode source block
 *** Attachments :ATTACH:
+:PROPERTIES:
+:ID:       0dfe28aa-0391-4ba4-a70b-07427dd31f6d
+:END:
 To attach a file to an org document, use the ~M-x org-attach~ command
 It will present you some options on what to attach.
 To attach images, you can use packages like ~org-download~ or ~org-attach-screenshot~ but it's hardly worth it, ~org-attach-screenshot~ was even crashing my machine.

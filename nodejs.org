@@ -693,8 +693,11 @@ But be carefull, there are performance considerations to this.
 #+begin_src sh
 npm i -D rollup rollup-plugin-typescript2 rollup-plugin-visualizer rollup-plugin-size-snapshot rollup-plugin-terser @rollup/plugin-node-resolve rollup-plugin-peer-deps-external
 #+end_src
-**** Example config file :ATTACH:
-Copy [[attachment:rollup.config.js][config]] file to project
+**** Example config file                                          :ATTACH:
+:PROPERTIES:
+:ID:       cb0d3385-4def-4771-8478-978dc254a7c8
+:END:
+Copy [[attachment:rollup.config.js][config]] to project
 ** Falsy values
 Values that evaluate to ~false~ in Javascript
 
